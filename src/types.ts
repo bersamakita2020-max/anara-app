@@ -117,12 +117,28 @@ export interface SopCheck {
 export interface Invoice {
   id: string
   orderId: string
+  clientId: string
   kind: 'dp' | 'pelunasan'
   number: string
   amount: number
+  discount: number
+  taxPercent: number
+  note: string
+  manual: boolean
+  uniqueCode: number
   status: 'terbit' | 'sebagian' | 'lunas' | 'batal' | 'terlambat'
   dueDate: string
   issuedAt: string
+}
+
+export interface InvoiceLine {
+  id: string
+  invoiceId: string
+  description: string
+  qty: number
+  unit: string
+  unitPrice: number
+  sort: number
 }
 
 export interface Payment {
@@ -132,6 +148,9 @@ export interface Payment {
   amount: number
   status: 'menunggu' | 'terverifikasi' | 'ditolak'
   proofName: string
+  proofPath: string
+  method: string
+  receiptNumber: string
   note: string
   paidAt: string
   verifiedAt: string | null
@@ -265,6 +284,69 @@ export interface Settlement {
   approvedAt: string | null
 }
 
+export interface OptionItem {
+  id: string
+  category: string
+  label: string
+  sort: number
+  active: boolean
+}
+
+export interface PayLine {
+  kind: 'pendapatan' | 'potongan'
+  label: string
+  amount: number
+}
+
+export interface Payslip {
+  id: string
+  number: string
+  period: string
+  workerId: string
+  recipientName: string
+  recipientTitle: string
+  status: 'draf' | 'disetujui' | 'dibayar'
+  lines: PayLine[]
+  gross: number
+  deductions: number
+  net: number
+  note: string
+  createdAt: string
+}
+
+export interface WaSettings {
+  provider: 'none' | 'cloud' | 'fonnte'
+  phoneNumberId: string
+  wabaId: string
+  displayPhone: string
+  cloudReady: boolean
+  fonnteReady: boolean
+}
+
+export interface WaLog {
+  id: string
+  direction: 'masuk' | 'keluar'
+  peer: string
+  body: string
+  status: string
+  provider: string
+  detail: string
+  at: string
+}
+
+export interface PaySettings {
+  provider: 'manual' | 'midtrans' | 'xendit' | 'tripay' | 'duitku'
+  sandbox: boolean
+  qrisDynamic: boolean
+  vaEnabled: boolean
+  bankName: string
+  bankNumber: string
+  bankHolder: string
+  qrisPath: string
+  tripayMerchant: string
+  duitkuMerchant: string
+}
+
 export interface Outbox {
   id: string
   channel: 'wa' | 'email'
@@ -296,6 +378,12 @@ export interface AppState {
   settings: Settings
   settlements: Settlement[]
   outbox: Outbox[]
+  options: OptionItem[]
+  invoiceLines: InvoiceLine[]
+  payslips: Payslip[]
+  waSettings: WaSettings
+  waLog: WaLog[]
+  paySettings: PaySettings
   session: SessionUser | null
 }
 

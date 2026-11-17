@@ -21,7 +21,11 @@ const ClientDetailPage = lazy(() => import('./pages/klien').then((mod) => ({ def
 const LayananPage = lazy(() => import('./pages/layanan').then((mod) => ({ default: mod.LayananPage })))
 const PaymentsPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.PaymentsPage })))
 const FinancePage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.FinancePage })))
-const ContractPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.ContractPage })))
+const ContractPage = lazy(() => import('./pages/kontrak').then((mod) => ({ default: mod.ContractPage })))
+const TagihanPage = lazy(() => import('./pages/tagihan').then((mod) => ({ default: mod.TagihanPage })))
+const SlipPage = lazy(() => import('./pages/slip').then((mod) => ({ default: mod.SlipPage })))
+const BayarPage = lazy(() => import('./pages/bayar').then((mod) => ({ default: mod.BayarPage })))
+const WhatsappPage = lazy(() => import('./pages/whatsapp').then((mod) => ({ default: mod.WhatsappPage })))
 const MonitorPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.MonitorPage })))
 const ReportPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.ReportPage })))
 const AutomationPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.AutomationPage })))
@@ -60,6 +64,10 @@ export default function App() {
               <Route path="/app/klien/:id" element={<ClientDetailPage />} />
               <Route path="/app/layanan" element={<LayananPage />} />
               <Route path="/app/pekerja" element={<PeoplePage kind="pekerja" />} />
+              <Route path="/app/tagihan" element={<TagihanPage />} />
+              <Route path="/app/slip" element={<SlipPage />} />
+              <Route path="/app/bayar" element={<BayarPage />} />
+              <Route path="/app/whatsapp" element={<WhatsappPage />} />
               <Route path="/app/pembayaran" element={<PaymentsPage />} />
               <Route path="/app/keuangan" element={<FinancePage />} />
               <Route path="/app/kontrak" element={<ContractPage />} />

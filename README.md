@@ -45,12 +45,32 @@ Jalankan berkas di `supabase/migrations/` sesuai nama, dari atas ke bawah:
 9. `20261117000900_public_flows.sql` — baca kontrak untuk pelanggan, terbit kontrak dari dasbor, jejak audit
 10. `20261117001000_layanan_klien_dokumen.sql` — kelola layanan, klien ditautkan ulang, kontrak tanpa OTP, segel QR, invoice otomatis
 11. `20261117001100_nomor_whatsapp.sql` — nomor WhatsApp resmi menjadi 0858-1169-9699 (`wa.me/6285811699699`)
+12. `20261117001200_admin_dokumen_bayar.sql` — opsi isian, nomor dokumen, slip gaji, WhatsApp, QRIS dan gateway
 
-Migrasi 008 dan 009 sudah diterapkan. Terapkan 010 lalu 011 di SQL Editor. Jangan menjalankan ulang 001 sampai 009.
+Migrasi 001 sampai 011 sudah diterapkan. Jalankan hanya berkas 012. Jangan menjalankan ulang berkas yang lebih lama.
 
 Di SQL Editor, tempel isi tiap berkas lalu jalankan. Jika `pg_cron` belum dinyalakan, migrasi 007 hanya menulis catatan dan tidak menggagalkan yang lain. Aktifkan `pg_cron` dan `pg_net` di Database → Extensions bila jadwal ingin hidup.
 
 Tidak ada berkas benih berisi pesanan palsu.
+
+### Edge Function yang perlu di-deploy
+
+- `wa-gateway` — simpan token WhatsApp ke skema private, kirim pesan, dan terima webhook Cloud API. `verify_jwt` dimatikan karena webhook Meta; aksi admin tetap memeriksa peran.
+- `pay-gateway` — membuat QRIS dinamis (dan virtual account bila dinyalakan) lewat Midtrans, Xendit, Tripay, atau Duitku, lalu menandai tagihan lunas dari webhook. Kartu dan e-wallet tidak dibuka.
+- `cron-daily` — berubah: pengingat jatuh tempo memakai jalur WhatsApp yang aktif.
+
+Secret yang diisi di Supabase → Edge Functions, bukan di repositori:
+
+- `MIDTRANS_SERVER_KEY`
+- `XENDIT_SECRET_KEY`
+- `XENDIT_WEBHOOK_TOKEN`
+- `TRIPAY_API_KEY`
+- `TRIPAY_PRIVATE_KEY`
+- `DUITKU_API_KEY`
+- `WA_CLOUD_TOKEN`, `WA_PHONE_NUMBER_ID`, dan `WA_WEBHOOK_VERIFY_TOKEN` hanya bila token tidak diisi dari halaman WhatsApp
+- `FONNTE_TOKEN` sebagai cadangan bila token Fonnte tidak disimpan dari dasbor
+
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `SUPABASE_SERVICE_ROLE_KEY` sudah disediakan platform. Webhook Midtrans: `.../functions/v1/pay-gateway?provider=midtrans`. Xendit: `?provider=xendit`. Tripay: `?provider=tripay`. Duitku: `?provider=duitku`. Cloud API: `.../functions/v1/wa-gateway`.
 
 ### Pemilik pertama
 

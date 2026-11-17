@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import icon from '../assets/brand/ikon-a-gradien.svg'
 import wordmark from '../assets/brand/wordmark-hitam.svg'
 import { InstallBanner, InstallButton } from './install'
@@ -98,13 +98,17 @@ export function PublicShell({ children }: { children: ReactNode }) {
 
 const LINKS: { to: string; label: string; icon: string; roles: Role[] }[] = [
   { to: '/app', label: 'Ringkasan', icon: '✦', roles: ['owner', 'finance', 'worker', 'social'] },
-  { to: '/app/order', label: 'Papan order', icon: '☰', roles: ['owner', 'finance', 'worker'] },
+  { to: '/app/order', label: 'Order', icon: '☰', roles: ['owner', 'finance', 'worker'] },
   { to: '/app/klien', label: 'Klien', icon: '☺', roles: ['owner', 'finance'] },
   { to: '/app/layanan', label: 'Layanan', icon: '◎', roles: ['owner', 'finance'] },
-  { to: '/app/pekerja', label: 'Pekerja', icon: '✎', roles: ['owner', 'finance'] },
-  { to: '/app/pembayaran', label: 'Pembayaran', icon: 'Rp', roles: ['owner', 'finance'] },
-  { to: '/app/keuangan', label: 'Keuangan', icon: '◈', roles: ['owner', 'finance'] },
+  { to: '/app/tagihan', label: 'Tagihan', icon: 'Rp', roles: ['owner', 'finance'] },
   { to: '/app/kontrak', label: 'Kontrak', icon: '⌘', roles: ['owner', 'finance'] },
+  { to: '/app/slip', label: 'Slip gaji', icon: '✎', roles: ['owner', 'finance'] },
+  { to: '/app/pembayaran', label: 'Kas masuk', icon: '↓', roles: ['owner', 'finance'] },
+  { to: '/app/keuangan', label: 'Keuangan', icon: '◈', roles: ['owner', 'finance'] },
+  { to: '/app/bayar', label: 'QRIS & gateway', icon: '▣', roles: ['owner', 'finance'] },
+  { to: '/app/whatsapp', label: 'WhatsApp', icon: '💬', roles: ['owner', 'finance'] },
+  { to: '/app/pekerja', label: 'Pekerja', icon: '☺', roles: ['owner', 'finance'] },
   { to: '/app/monitoring', label: 'Monitoring', icon: '◉', roles: ['owner', 'finance', 'worker'] },
   { to: '/app/laporan', label: 'Laporan', icon: '▤', roles: ['owner', 'finance'] },
   { to: '/app/automasi', label: 'Automasi', icon: '⚡', roles: ['owner', 'finance'] },
@@ -113,10 +117,26 @@ const LINKS: { to: string; label: string; icon: string; roles: Role[] }[] = [
   { to: '/app/audit', label: 'Jejak audit', icon: '≡', roles: ['owner', 'finance'] },
 ]
 
+const CRUMB: Record<string, string> = Object.fromEntries(LINKS.map((item) => [item.to, item.label]))
+
 export function AppShell({ children }: { children: ReactNode }) {
   const { state, loadError, act, prefetch } = useAnara()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('anara-side') === '1')
+  const [menu, setMenu] = useState(false)
+  const [palette, setPalette] = useState(false)
   const role = state.session?.role
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPalette(true)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   if (!state.session || role === 'client') {
     return (
       <PublicShell>
@@ -130,37 +150,40 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
   const links = LINKS.filter((item) => role && item.roles.includes(role))
   const unread = state.notices.filter((item) => !item.read && (item.forRole === 'semua' || item.forRole === role)).length
+  const crumb = CRUMB[location.pathname] || 'Dasbor'
   return (
-    <div className="app">
+    <div className={`app ${menu ? 'menu-open' : ''} ${collapsed ? 'side-collapsed' : ''}`}>
       <a className="skip" href="#isi">Loncat ke isi</a>
       <Aurora />
       <div className="app-shell">
         <aside className="side">
-          <NavLink to="/app"><img className="wm" src={wordmark} alt="anara" /></NavLink>
+          <div className="side-top">
+            <NavLink to="/app" onClick={() => setMenu(false)}><img className="wm" src={wordmark} alt="anara" /></NavLink>
+            <button className="btn btn-ghost btn-sm side-fold" type="button" aria-label={collapsed ? 'Lebarkan menu' : 'Ciutkan menu'} onClick={() => { const next = !collapsed; setCollapsed(next); localStorage.setItem('anara-side', next ? '1' : '0') }}>{collapsed ? '›' : '‹'}</button>
+          </div>
           <nav aria-label="Dasbor">
             {links.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.to === '/app'} className={({ isActive }) => (isActive ? 'on' : undefined)} onMouseEnter={prefetch} onFocus={prefetch}>
+              <NavLink key={item.to} to={item.to} end={item.to === '/app'} title={item.label} className={({ isActive }) => (isActive ? 'on' : undefined)} onMouseEnter={prefetch} onFocus={prefetch} onClick={() => setMenu(false)}>
                 <span aria-hidden="true">{item.icon}</span>
-                {item.label}
+                <span className="nav-label">{item.label}</span>
               </NavLink>
             ))}
-            <NavLink to="/">Lihat katalog</NavLink>
+            <NavLink to="/" onClick={() => setMenu(false)}><span aria-hidden="true">↗</span><span className="nav-label">Lihat katalog</span></NavLink>
           </nav>
-          <div className="install-slot">
-            <InstallButton className="btn btn-grad btn-sm" placement="below" />
-          </div>
           <div className="role">
             <b>{state.session.name}</b>
-            {role === 'owner' ? 'Pemilik' : role === 'finance' ? 'Keuangan dan Admin WA' : role === 'worker' ? 'Pekerja' : 'Admin media sosial'}
+            <span className="nav-label">{role === 'owner' ? 'Pemilik' : role === 'finance' ? 'Keuangan dan Admin WA' : role === 'worker' ? 'Pekerja' : 'Admin media sosial'}</span>
           </div>
         </aside>
         <div className="main" id="isi">
           {loadError ? <div className="banner" role="alert" style={{ width: 'auto', margin: '0 0 14px' }}>{loadError}</div> : null}
           <div className="topbar">
             <div>
+              <p className="crumb">Dasbor / {crumb}</p>
               <p style={{ color: 'var(--muted)', fontSize: 13 }}>ANARA, Beyond Value</p>
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="top-actions">
+              <button className="btn btn-ghost btn-sm" type="button" onClick={() => setPalette(true)}>Cari <kbd>Ctrl</kbd><kbd>K</kbd></button>
               <InstallButton />
               <ThemeButton />
               <NavLink className="btn btn-ghost btn-sm" to="/app/monitoring">Pemberitahuan{unread ? ` (${unread})` : ''}</NavLink>
@@ -171,13 +194,43 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       <nav className="mob-nav" aria-label="Navigasi dasbor">
-        <NavLink to="/app" end><span>✦</span>Ringkasan</NavLink>
+        <NavLink to="/app" end><span>✦</span>Ringkas</NavLink>
         <NavLink to="/app/order"><span>☰</span>Order</NavLink>
-        <NavLink to="/app/monitoring"><span>◉</span>Pantau</NavLink>
-        <NavLink to="/app/laporan"><span>▤</span>Laporan</NavLink>
+        <NavLink to="/app/tagihan"><span>Rp</span>Tagihan</NavLink>
+        <button type="button" onClick={() => setMenu((value) => !value)}><span>☰</span>Menu</button>
       </nav>
+      {palette ? <CommandPalette links={links} onClose={() => setPalette(false)} /> : null}
       <a className="wa-float" href={WA} target="_blank" rel="noreferrer" aria-label="Chat WhatsApp">💬 <span>WhatsApp</span></a>
       <Flash />
+    </div>
+  )
+}
+
+function CommandPalette({ links, onClose }: { links: typeof LINKS; onClose: () => void }) {
+  const { state } = useAnara()
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const items = useMemo(() => {
+    const pages = links.map((item) => ({ label: item.label, hint: 'Halaman', to: item.to }))
+    const orders = state.orders.slice(0, 40).map((item) => ({ label: `${item.code} · ${item.title}`, hint: 'Order', to: `/app/order/${item.id}` }))
+    const clients = state.clients.slice(0, 40).map((item) => ({ label: item.name, hint: 'Klien', to: `/app/klien/${item.id}` }))
+    const needle = query.trim().toLowerCase()
+    return [...pages, ...orders, ...clients].filter((item) => !needle || item.label.toLowerCase().includes(needle)).slice(0, 12)
+  }, [links, query, state.orders, state.clients])
+  return (
+    <div className="palette" role="dialog" aria-label="Pencarian">
+      <button className="palette-bg" type="button" aria-label="Tutup pencarian" onClick={onClose} />
+      <div className="palette-card">
+        <input className="field" autoFocus placeholder="Cari halaman, order, atau klien" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === 'Escape') onClose() }} />
+        <ul>
+          {items.map((item) => (
+            <li key={item.to + item.label}>
+              <button type="button" onClick={() => { navigate(item.to); onClose() }}><small>{item.hint}</small>{item.label}</button>
+            </li>
+          ))}
+          {items.length === 0 ? <li className="muted">Tidak ada hasil.</li> : null}
+        </ul>
+      </div>
     </div>
   )
 }

@@ -22,3 +22,9 @@ verify_jwt = false
 
 [functions.cron-weekly]
 verify_jwt = false
+
+[functions.wa-gateway]
+verify_jwt = false
+
+[functions.pay-gateway]
+verify_jwt = false
