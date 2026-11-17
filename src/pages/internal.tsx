@@ -88,7 +88,7 @@ function BoardBlock() {
             <h4>{column.title}</h4>
             {orders.filter((item) => column.stages.includes(item.stage)).map((item) => (
               <Link className="ticket" key={item.id} to={`/app/order/${item.id}`}>
-                <span className={`badge ${item.brand === 'edukasi' ? 'edu' : item.brand}`}>{item.brand}</span>
+                <span className="ticket-top"><span className={`badge ${item.brand === 'edukasi' ? 'edu' : item.brand}`}>{item.brand}</span></span>
                 <b>{item.title}</b>
                 <div className="meta">{item.code} · {rupiah(item.price)}</div>
               </Link>
@@ -121,8 +121,10 @@ export function OrdersPage() {
               const tone = dueTone(item.dueDate)
               return (
                 <Link className="ticket" key={item.id} to={`/app/order/${item.id}`}>
-                  <span className={`badge ${tone === 'late' ? 'late' : tone === 'soon' ? 'soon' : item.brand}`}>{tone === 'late' ? 'Terlambat' : tone === 'soon' ? 'Segera' : item.brand}</span>
-                  {item.sample ? <span className="demo-tag" /> : null}
+                  <span className="ticket-top">
+                    <span className={`badge ${tone === 'late' ? 'late' : tone === 'soon' ? 'soon' : item.brand === 'edukasi' ? 'edu' : item.brand}`}>{tone === 'late' ? 'Terlambat' : tone === 'soon' ? 'Segera' : item.brand}</span>
+                    {item.sample ? <span className="demo-tag" /> : null}
+                  </span>
                   <b>{item.title}</b>
                   <div className="meta">{item.code}<br />{tanggal(item.dueDate)} · {rupiah(item.price)}</div>
                 </Link>
