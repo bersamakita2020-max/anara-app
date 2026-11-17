@@ -4,7 +4,7 @@ Aplikasi pemesanan, kontrak, keuangan, dan pemantauan ANARA. Tagline resmi: **AN
 
 Tiga unit: ANARA Studio (video, audio, video AI, undangan digital), ANARA Edukasi (pendampingan tesis, skripsi, KTI, dan tugas untuk mahasiswa reguler serta RPL), dan ANARA Tech (situs profil, aplikasi kerja, Android, flipbook).
 
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699.
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699.
 
 ## Menjalankan di komputer
 
@@ -43,6 +43,10 @@ Jalankan berkas di `supabase/migrations/` sesuai nama, dari atas ke bawah:
 7. `20261117000700_cron.sql` — pengingat harian dan cadangan mingguan
 8. `20261117000800_team_preassign.sql` — peran pemilik dan keuangan sebelum akun dibuat
 9. `20261117000900_public_flows.sql` — baca kontrak untuk pelanggan, terbit kontrak dari dasbor, jejak audit
+10. `20261117001000_layanan_klien_dokumen.sql` — kelola layanan, klien ditautkan ulang, kontrak tanpa OTP, segel QR, invoice otomatis
+11. `20261117001100_nomor_whatsapp.sql` — nomor WhatsApp resmi menjadi 0858-1169-9699 (`wa.me/6285811699699`)
+
+Migrasi 008 dan 009 sudah diterapkan. Terapkan 010 lalu 011 di SQL Editor. Jangan menjalankan ulang 001 sampai 009.
 
 Di SQL Editor, tempel isi tiap berkas lalu jalankan. Jika `pg_cron` belum dinyalakan, migrasi 007 hanya menulis catatan dan tidak menggagalkan yang lain. Aktifkan `pg_cron` dan `pg_net` di Database → Extensions bila jadwal ingin hidup.
 

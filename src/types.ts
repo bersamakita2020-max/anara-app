@@ -32,6 +32,11 @@ export interface PackageItem {
   fixed: boolean
   revisions: number
   active: boolean
+  features: string
+  leadDays: number
+  icon: string
+  imageUrl: string
+  sort: number
 }
 
 export interface Client {
@@ -115,7 +120,7 @@ export interface Invoice {
   kind: 'dp' | 'pelunasan'
   number: string
   amount: number
-  status: 'terbit' | 'sebagian' | 'lunas' | 'batal'
+  status: 'terbit' | 'sebagian' | 'lunas' | 'batal' | 'terlambat'
   dueDate: string
   issuedAt: string
 }

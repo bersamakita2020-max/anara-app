@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PublicShell } from '../components/chrome'
+import { ActionButton } from '../components/ActionButton'
+import { CurrencyInput } from '../components/CurrencyInput'
 import { InstallButton } from '../components/install'
+import { QrMark } from '../components/QrMark'
+import { SignaturePad } from '../components/SignaturePad'
 import { useAnara } from '../data/store'
 import { callRpc } from '../data/remote'
 import { rupiah, tanggal } from '../lib/format'
+import { downloadTextPdf } from '../lib/pdf'
 import { STAGE_FLOW, STAGE_LABEL } from '../lib/sop'
 import type { PackageItem } from '../types'
 
@@ -31,7 +36,7 @@ export function HomePage() {
             <div className="hero-actions">
               <a className="btn btn-grad" href="#harga">Lihat layanan dan harga</a>
               <InstallButton className="btn btn-grad" placement="below" />
-              <a className="btn btn-ghost" href="https://wa.me/625811699699">Chat WhatsApp 0581-1699-699</a>
+              <a className="btn btn-ghost" href="https://wa.me/6285811699699">Chat WhatsApp 0858-1169-9699</a>
             </div>
             <div className="chips">
               <span className="chip">✦ Studio</span>
@@ -68,13 +73,14 @@ export function HomePage() {
               <h3 className="sora" style={{ marginBottom: 6 }}>{group.title}</h3>
               <p style={{ color: 'var(--muted)', marginBottom: 14 }}>{group.text}</p>
               <div className="pkg-grid">
-                {state.packages.filter((item) => item.brand === group.id && item.active).map((item) => (
+                {state.packages.filter((item) => item.brand === group.id && item.active).sort((a, b) => a.sort - b.sort).map((item) => (
                   <article key={item.id} className={`pkg ${item.brand === 'edukasi' ? 'edu' : item.brand}`}>
-                    <div className="unit-tag">{group.title.replace('ANARA ', '')}</div>
+                    <div className="unit-tag">{item.icon ? `${item.icon} ` : ''}{group.title.replace('ANARA ', '')}</div>
                     <h3>{item.name}</h3>
                     <p className="desc">{item.summary}</p>
+                    {item.features ? <p className="desc">{item.features}</p> : null}
                     <div className="price">{harga(item)}</div>
-                    <div className="price-note">{item.fixed ? 'Harga resmi' : 'Harga resmi, sesuai lingkup'}</div>
+                    <div className="price-note">{item.fixed ? 'Harga resmi' : 'Harga resmi, sesuai lingkup'}{item.leadDays ? ` · estimasi ${item.leadDays} hari` : ''}</div>
                     <Link className={item.id === 'undangan-premium' ? 'btn btn-grad btn-sm' : 'btn btn-ink btn-sm'} to={`/paket/${item.slug}`}>Lihat paket</Link>
                   </article>
                 ))}
@@ -141,6 +147,8 @@ export function PackagePage() {
       <div className="wrap layout-2">
         <article className="card">
           <h3>Yang termasuk</h3>
+          {item.features ? <p style={{ whiteSpace: 'pre-wrap' }}>{item.features}</p> : null}
+          <p>Estimasi pengerjaan {item.leadDays} hari setelah bahan lengkap dan uang muka masuk.</p>
           <p>Dua putaran revisi selama masih dalam lingkup. Uang muka standar 50 persen. File akhir setelah pelunasan.</p>
           {item.brand === 'edukasi' ? <p>Layanan ini pendampingan dan penyuntingan. Klien tetap bertanggung jawab atas keaslian naskah. Tidak ada jaminan kelulusan.</p> : null}
           {item.brand === 'tech' ? <p>Perbaikan bug pada lingkup yang disepakati berlaku 30 hari setelah serah terima.</p> : null}
@@ -164,9 +172,11 @@ export function OrderPage() {
   const { state, act } = useAnara()
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const initial = params.get('paket') || 'undangan-premium'
-  const [packageId, setPackageId] = useState(state.packages.some((item) => item.id === initial) ? initial : state.packages[0]?.id || '')
+  const initial = params.get('paket') || ''
+  const matched = state.packages.find((item) => item.id === initial || item.slug === initial)
+  const [packageId, setPackageId] = useState(matched?.id || state.packages.find((item) => item.active)?.id || '')
   const [message, setMessage] = useState('')
+  const [offer, setOffer] = useState(0)
   const pack = state.packages.find((item) => item.id === packageId)
   const price = pack?.fixed ? pack.priceMin : pack?.priceMin || 0
   const dpPercent = price >= 3_000_000 ? 70 : 50
@@ -193,7 +203,7 @@ export function OrderPage() {
         scriptType: String(form.get('naskah') || ''),
         referrer: String(form.get('perujuk') || ''),
         files,
-        price: pack && !pack.fixed ? Number(form.get('nilai') || price) : price,
+        price: pack && !pack.fixed ? offer || pack.priceMin : price,
       },
     })
     if (result.error) {
@@ -201,7 +211,9 @@ export function OrderPage() {
       return
     }
     const parts = (result.info || '').split('|')
-    navigate(`/setujui/${parts[1] || ''}`, { state: { note: parts[0], code: parts[2], otp: parts[3] } })
+    const code = parts[2] || ''
+    const wa = String(form.get('wa') || '')
+    navigate(`/lacak?kode=${encodeURIComponent(code)}&wa=${encodeURIComponent(wa)}&kontrak=${parts[1] || ''}`)
   }
 
   return (
@@ -233,7 +245,7 @@ export function OrderPage() {
           {!pack?.fixed ? (
             <>
               <label htmlFor="nilai">Nilai penawaran awal (dalam kisaran)</label>
-              <input className="field" id="nilai" name="nilai" type="number" min={pack?.priceMin} max={pack?.priceMax} defaultValue={pack?.priceMin} />
+              <CurrencyInput id="nilai" value={offer || pack?.priceMin || 0} onChange={setOffer} />
               <p className="hint">Nilai awal memakai batas bawah daftar harga. Nilai akhir dikunci pada penawaran tertulis, berlaku tujuh hari.</p>
             </>
           ) : null}
@@ -266,7 +278,7 @@ export function OrderPage() {
             <span>Saya bersedia meninjau perjanjian sebelum membayar uang muka. DP {dpPercent} persen, dua putaran revisi, file akhir setelah pelunasan.</span>
           </label>
           {message ? <p role="alert">{message}</p> : null}
-          <button className="btn btn-grad btn-wide" type="submit">Kirim pesanan dan buat kontrak</button>
+          <ActionButton className="btn btn-grad btn-wide" type="submit">Kirim pesanan</ActionButton>
         </form>
         <aside>
           <div className="summary">
@@ -292,6 +304,9 @@ export function SignPage() {
   const [remote, setRemote] = useState<typeof local | null>(null)
   const [note, setNote] = useState('')
   const [done, setDone] = useState(false)
+  const [drawn, setDrawn] = useState('')
+  const [typedSign, setTypedSign] = useState('')
+  const [seals, setSeals] = useState<{ token: string; signerName: string; signerTitle: string }[]>([])
   const [loading, setLoading] = useState(!local)
   useEffect(() => {
     if (!id || local) return
@@ -315,6 +330,8 @@ export function SignPage() {
           attempts: 0,
           sample: false,
         })
+        const extra = data as { seals?: { token: string; signerName: string; signerTitle: string }[] }
+        if (extra.seals) setSeals(extra.seals)
       })
       .catch(() => undefined)
       .finally(() => { if (active) setLoading(false) })
@@ -342,7 +359,7 @@ export function SignPage() {
       type: 'sign',
       contractId: contract!.id,
       name: String(form.get('nama') || ''),
-      otp: String(form.get('otp') || ''),
+      signature: drawn || (typedSign.trim() ? `nama:${typedSign.trim()}` : ''),
       agree: form.get('setuju') === 'on',
       ip,
       userAgent: navigator.userAgent,
@@ -363,22 +380,29 @@ export function SignPage() {
             <div style={{ textAlign: 'right', fontSize: 12 }}>{contract.number}</div>
           </div>
           <div className="rule" />
-          <div className="addr">Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699</div>
+          <div className="addr">Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699</div>
           <h2>{contract.title}</h2>
+          <p>Uang muka 50 persen, atau 70 persen bila nilai mencapai Rp3.000.000. Dua putaran revisi. Pembatalan sebelum mulai mengembalikan uang muka setelah dipotong 10 persen. Garansi perbaikan bug Tech berlaku 30 hari.</p>
           <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{contract.body}</pre>
+          <div className="qr-row">
+            {seals.map((seal) => <QrMark key={seal.token} token={seal.token} label={`${seal.signerName} · ${seal.signerTitle}`} />)}
+          </div>
         </article>
         <form className="card" onSubmit={onSubmit}>
           <h3>Tanda persetujuan</h3>
-          <p>Tuliskan nama terang, centang persetujuan, lalu masukkan kode yang dikirim ke WhatsApp pesanan.</p>
+          <p>Tuliskan nama terang, centang persetujuan, lalu bubuhkan tanda tangan dengan mengetik nama atau menggambar di bidang di bawah.</p>
+          <button className="btn btn-ghost btn-sm" type="button" onClick={() => void downloadTextPdf({ filename: `${contract.number || 'kontrak'}.pdf`, kicker: 'ANARA', title: contract.title, number: contract.number, address: 'Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699', body: contract.body })}>Unduh PDF</button>
           <label htmlFor="nama">Nama terang</label>
           <input className="field" id="nama" name="nama" required minLength={3} />
-          <label htmlFor="otp">Kode konfirmasi</label>
-          <input className="field" id="otp" name="otp" inputMode="numeric" required />
+          <label htmlFor="ttd-nama">Tanda tangan dengan mengetik nama</label>
+          <input className="field" id="ttd-nama" value={typedSign} onChange={(event) => setTypedSign(event.target.value)} />
+          <p className="hint">Atau gambar tanda tangan di bidang berikut.</p>
+          <SignaturePad onChange={setDrawn} />
           <label style={{ display: 'flex', gap: 8, fontWeight: 400 }}>
             <input type="checkbox" name="setuju" required />
             <span>Saya sudah membaca perjanjian dan menyetujuinya.</span>
           </label>
-          <button className="btn btn-grad btn-wide" type="submit">Setujui kontrak</button>
+          <ActionButton className="btn btn-grad btn-wide" type="submit">Setujui kontrak</ActionButton>
           {note ? <p role="status">{note}</p> : null}
           {contract.status === 'disetujui' ? <p>Disetujui oleh {contract.signerName} pada {tanggal(contract.signedAt)}. Jejak IP: {contract.ip || 'tidak tersedia'}.</p> : null}
         </form>
@@ -388,21 +412,33 @@ export function SignPage() {
 }
 
 export function TrackPage() {
-  const [code, setCode] = useState('')
-  const [wa, setWa] = useState('')
+  const [params] = useSearchParams()
+  const [code, setCode] = useState(params.get('kode') || '')
+  const [wa, setWa] = useState(params.get('wa') || '')
   const [looked, setLooked] = useState(false)
-  const [view, setView] = useState<{ code: string; title: string; brand: string; stage: string; price: number; dueDate: string } | null>(null)
+  const [view, setView] = useState<{ code: string; title: string; brand: string; stage: string; price: number; dueDate: string; contractId?: string } | null>(null)
+  const [history, setHistory] = useState<{ code: string; title: string; stage: string; price: number }[]>([])
   const index = view ? STAGE_FLOW.indexOf(view.stage as (typeof STAGE_FLOW)[number]) : -1
-  async function search() {
+  async function search(nextCode = code, nextWa = wa) {
     setLooked(true)
     setView(null)
+    setHistory([])
     try {
-      const data = await callRpc<typeof view>('track_order', { p_code: code, p_wa: wa })
-      setView(data)
+      const data = await callRpc<{ current?: typeof view; history?: typeof history; code?: string; title?: string; brand?: string; stage?: string; price?: number; dueDate?: string } | null>('track_order', { p_code: nextCode, p_wa: nextWa })
+      if (!data) return
+      if (data.current) {
+        setView(data.current)
+        setHistory(data.history || [])
+      } else if (data.code) {
+        setView({ code: data.code, title: data.title || '', brand: data.brand || '', stage: data.stage || '', price: data.price || 0, dueDate: data.dueDate || '' })
+      }
     } catch {
       setView(null)
     }
   }
+  useEffect(() => {
+    if (params.get('kode') && params.get('wa')) void search(params.get('kode') || '', params.get('wa') || '')
+  }, [])
   return (
     <PublicShell>
       <div className="wrap page-head">
@@ -432,13 +468,20 @@ export function TrackPage() {
                   </div>
                 ))}
               </div>
+              {history.length > 1 ? (
+                <div style={{ marginTop: 12 }}>
+                  <h3>Riwayat pesanan pada nomor ini</h3>
+                  {history.map((item) => <p key={item.code}>{item.code} · {item.title} · {item.stage} · {rupiah(item.price)}</p>)}
+                </div>
+              ) : null}
+              {view.contractId || params.get('kontrak') ? <p style={{ marginTop: 12 }}><Link to={`/setujui/${view.contractId || params.get('kontrak')}`}>Buka kontrak</Link></p> : null}
             </div>
           ) : null}
         </div>
         <aside className="card">
           <h3>Butuh bantuan?</h3>
           <p>Admin WhatsApp membalas pada hari kerja yang sama.</p>
-          <a className="btn btn-grad btn-wide" href="https://wa.me/625811699699">Chat 0581-1699-699</a>
+          <a className="btn btn-grad btn-wide" href="https://wa.me/6285811699699">Chat 0858-1169-9699</a>
           <p style={{ marginTop: 12 }}><Link to="/syarat">Syarat dan ketentuan</Link></p>
         </aside>
       </div>
