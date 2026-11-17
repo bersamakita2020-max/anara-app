@@ -1,166 +1,134 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { supabase, supabaseEnabled } from '../lib/supabase'
-import { apply, type Action, type ApplyResult } from './actions'
-import { callRpc, loadRemote } from './remote'
-import { createDemoState } from './seed'
-import type { AppState } from '../types'
-
-const KEY = 'anara-demo-v1'
+import { pesanAuth } from '../lib/authPesan'
+import type { Action, ApplyResult } from './actions'
+import { emptyState } from './defaults'
+import { loadRemote } from './remote'
+import { persist } from './persist'
 
 interface StoreValue {
-  state: AppState
+  state: ReturnType<typeof emptyState>
   ready: boolean
-  mode: 'demo' | 'live'
-  banner: string
+  loadError: string | null
   flash: string | null
   clearFlash: () => void
   act: (action: Action) => Promise<ApplyResult>
-  loginLive: (email: string, password: string) => Promise<string | null>
-  signupLive: (email: string, password: string, name: string) => Promise<string | null>
+  login: (email: string, password: string) => Promise<string | null>
+  signup: (email: string, password: string) => Promise<string | null>
+  resetPassword: (email: string) => Promise<string | null>
   reload: () => Promise<void>
 }
 
 const Ctx = createContext<StoreValue | null>(null)
 
-function readLocal(): AppState {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (raw) {
-      const parsed = JSON.parse(raw) as AppState
-      if (parsed.packages?.length && parsed.settings) return parsed
-    }
-  } catch {
-    /* data lama diabaikan */
-  }
-  return createDemoState()
-}
-
 export function AnaraProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>(createDemoState)
+  const [state, setState] = useState(emptyState)
   const [ready, setReady] = useState(false)
-  const [mode, setMode] = useState<'demo' | 'live'>('demo')
-  const [banner, setBanner] = useState('')
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
-  const modeRef = useRef(mode)
-  modeRef.current = mode
 
-  async function boot() {
-    if (!supabaseEnabled || !supabase) {
-      setState(readLocal())
-      setMode('demo')
-      setBanner('Mode contoh. Data operasional bertanda contoh dan tersimpan di peramban ini.')
-      setReady(true)
-      return
-    }
-    try {
-      const remote = await loadRemote()
-      setState(remote)
-      setMode('live')
-      setBanner('')
-    } catch {
-      setState(readLocal())
-      setMode('demo')
-      setBanner('Basis data belum siap atau belum diisi paket. Menampilkan data contoh.')
-    }
-    setReady(true)
+  async function reload() {
+    if (!supabase) return
+    const remote = await loadRemote()
+    setState((current) => ({ ...remote, session: remote.session || current.session }))
+    setLoadError(null)
   }
 
   useEffect(() => {
+    async function boot() {
+      if (!supabaseEnabled || !supabase) {
+        setLoadError('Server belum dikonfigurasi.')
+        setReady(true)
+        return
+      }
+      try {
+        setState(await loadRemote())
+        setLoadError(null)
+      } catch (error) {
+        setLoadError(error instanceof Error ? error.message : 'Data tidak dapat dimuat.')
+      }
+      setReady(true)
+    }
     void boot()
   }, [])
 
   useEffect(() => {
-    if (mode !== 'live' || !supabase) return
-    const channel = supabase
+    if (!supabase || loadError) return
+    const client = supabase
+    const channel = client
       .channel('anara-live')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        void reload()
+        void reload().catch(() => undefined)
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
-        void reload()
+        void reload().catch(() => undefined)
       })
       .subscribe()
-    const client = supabase
     return () => {
       void client.removeChannel(channel)
     }
-  }, [mode])
-
-  async function reload() {
-    if (!supabaseEnabled || !supabase) return
-    try {
-      const remote = await loadRemote()
-      setState((current) => ({ ...remote, session: remote.session || current.session }))
-      setMode('live')
-    } catch {
-      /* tetap pada data yang sudah tampil */
-    }
-  }
+  }, [loadError])
 
   const api = useMemo<StoreValue>(() => {
     return {
       state,
       ready,
-      mode,
-      banner,
+      loadError,
       flash,
       clearFlash: () => setFlash(null),
       reload,
-      async loginLive(email, password) {
-        if (!supabase) return 'Mode contoh tidak memakai kata sandi server.'
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
-        if (error) return error.message
-        await reload()
+      async login(email, password) {
+        if (!supabase) return 'Server belum dikonfigurasi.'
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+        if (error) return pesanAuth(error.message, 'masuk')
+        try {
+          await reload()
+        } catch (err) {
+          return err instanceof Error ? err.message : 'Data tidak dapat dimuat setelah masuk.'
+        }
         return null
       },
-      async signupLive(email, password, name) {
-        if (!supabase) return 'Pendaftaran server tidak aktif pada mode contoh.'
-        const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } })
-        if (error) return error.message
+      async signup(email, password) {
+        if (!supabase) return 'Server belum dikonfigurasi.'
+        const { data, error } = await supabase.auth.signUp({ email: email.trim(), password })
+        if (error) return pesanAuth(error.message, 'daftar')
+        if (!data.session) return 'Cek email Anda untuk konfirmasi.'
+        try {
+          await reload()
+        } catch {
+          return null
+        }
         return null
+      },
+      async resetPassword(email) {
+        if (!supabase) return 'Server belum dikonfigurasi.'
+        const redirectTo = `${window.location.origin}/anara-app/masuk`
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo })
+        if (error) return pesanAuth(error.message, 'reset')
+        return 'Jika email terdaftar, tautan pengaturan ulang kata sandi sudah dikirim. Cek email Anda.'
       },
       async act(action) {
-        if (modeRef.current === 'live' && supabase && (action.type === 'create-order' || action.type === 'sign')) {
+        if (action.type === 'logout') {
+          await supabase?.auth.signOut()
+          setState((current) => ({ ...current, session: null }))
+          return { info: 'Anda sudah keluar.' }
+        }
+        const result = await persist(state, action)
+        if (result.error) setFlash(result.error)
+        else {
+          if (result.info && !result.info.includes('|')) setFlash(result.info)
           try {
-            if (action.type === 'create-order') {
-              const data = await callRpc<{ code: string; contractId: string; number: string }>('create_public_order', { payload: action.input })
-              await reload()
-              return { state, info: `Pesanan ${data.code} tercatat di server.|${data.contractId}|${data.code}|` }
-            }
-            const data = await callRpc<{ ok: boolean }>('sign_contract', {
-              p_contract_id: action.contractId,
-              p_name: action.name,
-              p_otp: action.otp,
-              p_agree: action.agree,
-              p_ip: action.ip,
-              p_ua: action.userAgent,
-            })
             await reload()
-            return { state, info: data.ok ? 'Kontrak disetujui di server.' : 'Kontrak diproses.' }
           } catch (error) {
-            const message = error instanceof Error ? error.message : 'Gagal menghubungi server'
+            const message = error instanceof Error ? error.message : 'Data tidak dapat dimuat ulang.'
             setFlash(message)
-            return { state, error: message }
+            return { error: message }
           }
         }
-        if (action.type === 'reset-demo') {
-          localStorage.removeItem(KEY)
-          const fresh = createDemoState()
-          setState(fresh)
-          setMode('demo')
-          return { state: fresh, info: 'Data contoh dikembalikan.' }
-        }
-        const result = apply(state, action)
-        if (!result.error) {
-          setState(result.state)
-          if (modeRef.current === 'demo') localStorage.setItem(KEY, JSON.stringify(result.state))
-        }
-        if (result.error) setFlash(result.error)
-        else if (result.info && !result.info.includes('|')) setFlash(result.info)
         return result
       },
     }
-  }, [state, ready, mode, banner, flash])
+  }, [state, ready, loadError, flash])
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>
 }

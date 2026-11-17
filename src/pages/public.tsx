@@ -1,11 +1,10 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PublicShell } from '../components/chrome'
 import { InstallButton } from '../components/install'
 import { useAnara } from '../data/store'
 import { callRpc } from '../data/remote'
-import { TRACK_HINT } from '../data/seed'
-import { phoneKey, rupiah, tanggal } from '../lib/format'
+import { rupiah, tanggal } from '../lib/format'
 import { STAGE_FLOW, STAGE_LABEL } from '../lib/sop'
 import type { PackageItem } from '../types'
 
@@ -63,6 +62,7 @@ export function HomePage() {
             <h2>Daftar harga resmi</h2>
             <p>Harga undangan sudah tetap. Kisaran lain berarti nilai akhir disepakati pada penawaran, berlaku tujuh hari.</p>
           </div>
+          {state.packages.filter((item) => item.active).length === 0 ? <p className="empty">Belum ada layanan. Daftar harga dimuat dari server.</p> : null}
           {groups.map((group) => (
             <div key={group.id} style={{ marginBottom: 28 }}>
               <h3 className="sora" style={{ marginBottom: 6 }}>{group.title}</h3>
@@ -98,18 +98,19 @@ export function HomePage() {
         <div className="wrap">
           <div className="sec-head"><h2>Karya dan kata klien</h2><p>Cuplikan portofolio dan testimoni yang diizinkan. Naskah akademik tidak ditampilkan.</p></div>
           <div className="port" style={{ marginBottom: 22 }}>
+            {state.portfolio.filter((item) => item.published).length === 0 ? <p className="empty">Belum ada karya yang diizinkan untuk ditampilkan.</p> : null}
             {state.portfolio.filter((item) => item.published).map((item) => (
               <div className="item" key={item.id}>
                 <div className="ph" />
                 <b>{item.title}</b>
-                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{item.caption} {item.sample ? <span className="demo-tag" /> : null}</p>
+                <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{item.caption}</p>
               </div>
             ))}
           </div>
           <div className="carousel">
+            {state.testimonials.filter((item) => item.published).length === 0 ? <p className="empty">Belum ada testimoni.</p> : null}
             {state.testimonials.filter((item) => item.published).map((item) => (
               <article className="quote" key={item.id}>
-                {item.sample ? <span className="demo-tag" /> : null}
                 <div className="stars">{'★'.repeat(item.stars)}</div>
                 <p>“{item.quote}”</p>
                 <div className="who">{item.name} · {item.role}</div>
@@ -233,7 +234,7 @@ export function OrderPage() {
             <>
               <label htmlFor="nilai">Nilai penawaran awal (dalam kisaran)</label>
               <input className="field" id="nilai" name="nilai" type="number" min={pack?.priceMin} max={pack?.priceMax} defaultValue={pack?.priceMin} />
-              <p className="hint">Angka ini contoh hitungan awal. Nilai akhir mengikuti penawaran tertulis, berlaku tujuh hari.</p>
+              <p className="hint">Nilai awal memakai batas bawah daftar harga. Nilai akhir dikunci pada penawaran tertulis, berlaku tujuh hari.</p>
             </>
           ) : null}
           <label htmlFor="brief">Ceritakan kebutuhan</label>
@@ -286,15 +287,45 @@ export function OrderPage() {
 
 export function SignPage() {
   const { id } = useParams()
-  const { state, act, mode } = useAnara()
-  const contract = state.contracts.find((item) => item.id === id)
+  const { state, act } = useAnara()
+  const local = state.contracts.find((item) => item.id === id)
+  const [remote, setRemote] = useState<typeof local | null>(null)
   const [note, setNote] = useState('')
   const [done, setDone] = useState(false)
+  const [loading, setLoading] = useState(!local)
+  useEffect(() => {
+    if (!id || local) return
+    let active = true
+    void callRpc<{ id: string; orderId: string | null; number: string; title: string; body: string; status: 'draf' | 'terkirim' | 'disetujui'; signerName: string; signedAt: string | null } | null>('get_public_contract', { p_id: id })
+      .then((data) => {
+        if (!active || !data) return
+        setRemote({
+          id: data.id,
+          orderId: data.orderId,
+          templateKey: '',
+          number: data.number,
+          title: data.title,
+          body: data.body,
+          status: data.status,
+          signerName: data.signerName || '',
+          signedAt: data.signedAt,
+          ip: '',
+          userAgent: '',
+          otpHint: null,
+          attempts: 0,
+          sample: false,
+        })
+      })
+      .catch(() => undefined)
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [id, local])
+  const contract = local || remote
   if (done) {
     return <PublicShell><div className="wrap page-head"><h1>Kontrak disetujui</h1><p>{note}</p><Link to="/lacak">Lacak pesanan</Link></div></PublicShell>
   }
   if (!contract) {
-    return <PublicShell><div className="wrap page-head"><h1>Kontrak tidak ditemukan</h1><p>Buka tautan dari pesanan, atau lacak dengan kode order.</p></div></PublicShell>
+    return <PublicShell><div className="wrap page-head"><h1>{loading ? 'Memuat kontrak' : 'Kontrak tidak ditemukan'}</h1><p>{loading ? 'Sedang mengambil naskah perjanjian.' : 'Buka tautan dari pesanan, atau lacak dengan kode order.'}</p></div></PublicShell>
   }
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -339,9 +370,6 @@ export function SignPage() {
         <form className="card" onSubmit={onSubmit}>
           <h3>Tanda persetujuan</h3>
           <p>Tuliskan nama terang, centang persetujuan, lalu masukkan kode yang dikirim ke WhatsApp pesanan.</p>
-          {mode === 'demo' && contract.otpHint ? (
-            <p><span className="demo-tag" /> Kode percobaan: <b>{contract.otpHint}</b></p>
-          ) : null}
           <label htmlFor="nama">Nama terang</label>
           <input className="field" id="nama" name="nama" required minLength={3} />
           <label htmlFor="otp">Kode konfirmasi</label>
@@ -360,25 +388,19 @@ export function SignPage() {
 }
 
 export function TrackPage() {
-  const { state, mode } = useAnara()
   const [code, setCode] = useState('')
   const [wa, setWa] = useState('')
   const [looked, setLooked] = useState(false)
-  const [remoteOrder, setRemoteOrder] = useState<{ code: string; title: string; brand: string; stage: string; price: number; dueDate: string; sample?: boolean } | null>(null)
-  const order = state.orders.find((item) => item.code.toLowerCase() === code.trim().toLowerCase())
-  const client = state.clients.find((item) => item.id === order?.clientId)
-  const match = Boolean(order && client && phoneKey(client.whatsapp) === phoneKey(wa))
-  const view = match && order ? order : remoteOrder
+  const [view, setView] = useState<{ code: string; title: string; brand: string; stage: string; price: number; dueDate: string } | null>(null)
   const index = view ? STAGE_FLOW.indexOf(view.stage as (typeof STAGE_FLOW)[number]) : -1
-  async function search(nextCode = code, nextWa = wa) {
+  async function search() {
     setLooked(true)
-    setRemoteOrder(null)
-    if (mode !== 'live') return
+    setView(null)
     try {
-      const data = await callRpc<NonNullable<typeof remoteOrder>>('track_order', { p_code: nextCode, p_wa: nextWa })
-      setRemoteOrder(data)
+      const data = await callRpc<typeof view>('track_order', { p_code: code, p_wa: wa })
+      setView(data)
     } catch {
-      setRemoteOrder(null)
+      setView(null)
     }
   }
   return (
@@ -395,13 +417,11 @@ export function TrackPage() {
             <label htmlFor="wa-lacak">Nomor WhatsApp</label>
             <input className="field" id="wa-lacak" value={wa} onChange={(event) => setWa(event.target.value)} inputMode="tel" />
             <button className="btn btn-grad" type="submit">Cari</button>
-            <button className="btn btn-ghost" type="button" style={{ marginLeft: 8 }} onClick={() => { setCode(TRACK_HINT.code); setWa(TRACK_HINT.whatsapp); void search(TRACK_HINT.code, TRACK_HINT.whatsapp) }}>Isi data contoh</button>
           </form>
           {looked && !view ? <div className="card empty" role="status">Pesanan tidak ditemukan. Periksa kode dan nomor WhatsApp.</div> : null}
           {view ? (
             <div className="card">
               <div className="badge studio">{view.brand}</div>
-              {view.sample ? <span className="demo-tag" /> : null}
               <h2 style={{ fontSize: 22, margin: '8px 0' }}>{view.title}</h2>
               <p style={{ color: 'var(--muted)' }}>{view.code} · {rupiah(view.price)} · tenggat {tanggal(view.dueDate)}</p>
               <div className="timeline" style={{ marginTop: 16 }}>
@@ -438,53 +458,50 @@ export function TermsPage() {
 }
 
 export function LoginPage() {
-  const { mode, act, loginLive, signupLive } = useAnara()
+  const { login, signup, resetPassword } = useAnara()
   const navigate = useNavigate()
   const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
   return (
     <PublicShell>
       <div className="wrap page-head">
         <h1>Masuk tim</h1>
-        <p>Pemilik, keuangan, pekerja, dan admin media sosial memakai peran yang berbeda.</p>
+        <p>Gunakan email dan kata sandi. Nama akun mengikuti data yang sudah ditetapkan.</p>
       </div>
-      <div className="wrap layout-2">
+      <div className="wrap" style={{ maxWidth: 560, paddingBottom: 48 }}>
         <form className="card" onSubmit={async (event) => {
           event.preventDefault()
-          if (mode === 'demo') {
-            setError('Mode contoh memakai tombol peran di samping.')
-            return
-          }
-          const message = await loginLive(email, password)
+          setInfo('')
+          const message = await login(email, password)
           setError(message || '')
           if (!message) navigate('/app')
         }}>
-          <h3>Akun server</h3>
-          <label htmlFor="email">Surel</label>
-          <input className="field" id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
+          <h3>Email dan kata sandi</h3>
+          <label htmlFor="email">Email</label>
+          <input className="field" id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" required />
           <label htmlFor="sandi">Kata sandi</label>
-          <input className="field" id="sandi" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
-          <label htmlFor="nama-akun">Nama saat daftar</label>
-          <input className="field" id="nama-akun" value={name} onChange={(event) => setName(event.target.value)} />
+          <input className="field" id="sandi" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required minLength={6} />
           <button className="btn btn-grad" type="submit">Masuk</button>
           <button className="btn btn-ghost" type="button" style={{ marginLeft: 8 }} onClick={async () => {
-            const message = await signupLive(email, password, name)
-            setError(message || 'Pendaftaran terkirim. Jika konfirmasi surel aktif, buka surel itu lalu masuk. Pemilik pertama dapat ditetapkan dari SQL di README.')
+            setError('')
+            const message = await signup(email, password)
+            if (message === 'Cek email Anda untuk konfirmasi.') setInfo(message)
+            else setError(message || '')
+            if (!message) navigate('/app')
           }}>Daftar</button>
+          <p style={{ marginTop: 12 }}>
+            <button className="btn btn-ghost btn-sm" type="button" onClick={async () => {
+              setError('')
+              const message = await resetPassword(email)
+              if (message && message.startsWith('Jika email')) setInfo(message)
+              else setError(message || '')
+            }}>Lupa kata sandi</button>
+          </p>
           {error ? <p role="alert">{error}</p> : null}
+          {info ? <p role="status">{info}</p> : null}
         </form>
-        <div className="card">
-          <h3>Mode contoh</h3>
-          <p>Pilih peran untuk melihat batas akses. Tidak ada kata sandi pada mode ini.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <button className="btn btn-grad" type="button" onClick={async () => { await act({ type: 'login-demo', role: 'owner' }); navigate('/app') }}>Masuk sebagai pemilik</button>
-            <button className="btn btn-ghost" type="button" onClick={async () => { await act({ type: 'login-demo', role: 'finance' }); navigate('/app') }}>Masuk sebagai keuangan</button>
-            <button className="btn btn-ghost" type="button" onClick={async () => { await act({ type: 'login-demo', role: 'worker' }); navigate('/app') }}>Masuk sebagai pekerja</button>
-            <button className="btn btn-ghost" type="button" onClick={async () => { await act({ type: 'login-demo', role: 'social' }); navigate('/app') }}>Masuk sebagai admin medsos</button>
-          </div>
-        </div>
       </div>
     </PublicShell>
   )

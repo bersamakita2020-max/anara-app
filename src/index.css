@@ -38,8 +38,6 @@ a{color:inherit;text-decoration:none}
 button,input,select,textarea{font:inherit}
 h1,h2,h3,h4,.sora{font-family:Sora,sans-serif;letter-spacing:-.04em}
 .wrap{width:min(1180px,calc(100% - 40px));margin:0 auto}
-.demo-tag{display:inline-flex;align-items:center;gap:6px;font-family:Sora,sans-serif;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8A6D1F;background:#FFF6D9;border:1px solid #E8D7A4;padding:4px 10px;border-radius:999px}
-.demo-tag::before{content:"contoh"}
 
 /* Aurora background */
 .aurora{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}

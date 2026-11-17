@@ -15,7 +15,7 @@ npm run dev
 
 Buka `http://localhost:5173/anara-app/`.
 
-Tanpa `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY`, aplikasi membangun dan menampilkan **mode contoh**. Data operasional bertanda contoh dan tersimpan di peramban. Peran dicoba dari halaman Masuk tim, tanpa kata sandi.
+Salin `.env.example` menjadi `.env` lalu isi `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY`. Tanpa keduanya aplikasi tidak memuat data palsu; halaman menampilkan bahwa server belum dikonfigurasi.
 
 ```bash
 npm test
@@ -41,10 +41,12 @@ Jalankan berkas di `supabase/migrations/` sesuai nama, dari atas ke bawah:
 5. `20261117000500_reference.sql` — harga resmi, tujuh templat, aturan, dua pengurus
 6. `20261117000600_storage.sql` — ember `order-files`
 7. `20261117000700_cron.sql` — pengingat harian dan cadangan mingguan
+8. `20261117000800_team_preassign.sql` — peran pemilik dan keuangan sebelum akun dibuat
+9. `20261117000900_public_flows.sql` — baca kontrak untuk pelanggan, terbit kontrak dari dasbor, jejak audit
 
 Di SQL Editor, tempel isi tiap berkas lalu jalankan. Jika `pg_cron` belum dinyalakan, migrasi 007 hanya menulis catatan dan tidak menggagalkan yang lain. Aktifkan `pg_cron` dan `pg_net` di Database → Extensions bila jadwal ingin hidup.
 
-`supabase/seed.sql` berisi satu klien dan satu order bertanda contoh. Jalankan hanya di basis percobaan.
+Tidak ada berkas benih berisi pesanan palsu.
 
 ### Pemilik pertama
 
@@ -108,7 +110,7 @@ supabase functions deploy cron-weekly
 2. Workflow `.github/workflows/pages.yml` membangun `dist` dengan basis `/anara-app/` dan menyalin `404.html` agar tautan langsung tetap membuka aplikasi.
 3. Situs: `https://<pemilik>.github.io/anara-app/`.
 
-Jika secret belum terisi saat build, situs tetap naik dalam mode contoh.
+Jika secret belum terisi saat build, situs tetap dapat dibangun, tetapi tidak menampilkan data operasional.
 
 ## Pemakaian singkat
 
@@ -118,7 +120,8 @@ Jika secret belum terisi saat build, situs tetap naik dalam mode contoh.
 - Papan order mengikuti tahap SOP 001–011 beserta checklist. Edukasi jatuh ke mitra keuangan, Studio dan Tech ke pemilik, sampai dialihkan.
 - Saat pelunasan diverifikasi, hasil terbagi sesuai fase: Jan–Apr 40/30/15/15, Mei–Sep 45/15/15/25, Okt–Des 50/10/15/25. Laba 60 persen pemilik dan 40 persen mitra. Referral 5 persen hanya jika perujuk tercatat. Dana darurat mengunci 20 persen kas sampai Rp5 juta. Honor peran Rp300.000 / Rp500.000 / Rp750.000 per fase, dari operasional. Settlement tanggal 5 disetujui pemilik sebelum ditandai dibayar.
 - Rekrutmen tetap terkunci sampai omzet tiga bulan berturut-turut minimal Rp12 juta dan kas minimal Rp15 juta.
-- Generator kontrak memakai tujuh templat (PKS mitra, pekerja dan admin medsos, klien umum, Studio, Tech, Edukasi, syarat). Nomor contoh: `ANR/STD/001/XI/2026`. Rekening usaha dikosongkan sampai diisi di Pengaturan.
+- Generator kontrak memakai tujuh templat (PKS mitra, pekerja dan admin medsos, klien umum, Studio, Tech, Edukasi, syarat). Nomor berbentuk `ANR/STD/001/XI/2026`. Rekening usaha dikosongkan sampai diisi di Pengaturan.
+- Masuk tim hanya dengan email dan kata sandi. Lupa kata sandi mengirim tautan lewat email. Nama akun diisi otomatis.
 - Monitoring menandai tenggat terlambat dan yang hampir jatuh tempo, beban pekerja, SLA tahap, DP dan pelunasan tertunda, revisi, serta kas.
 - Laporan harian, mingguan, bulanan, tahunan, atau rentang sendiri dapat disaring per unit, layanan, pekerja, dan klien, lalu diunduh CSV atau PDF.
 
