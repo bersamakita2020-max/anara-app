@@ -47,11 +47,23 @@ Deno.serve(async (req) => {
     if (body.status === "PAID" || body.status === "SETTLED") await tandai(String(body.external_id), Math.round(Number(body.paid_amount || 0)), "QRIS", `xendit:${body.id}`)
     return Response.json({ ok: true })
   }
-  if (provider === "tripay" || provider === "duitku") {
-    const body = await req.json().catch(() => ({})) as Record<string, string>
-    const ref = body.merchant_ref || body.merchantOrderId || ""
-    const status = body.status || body.resultCode || ""
-    if (["PAID", "00"].includes(status)) await tandai(ref.split(":")[0], Math.round(Number(body.amount || body.total_amount || 0)), "QRIS", `${provider}:${ref}`)
+  if (provider === "tripay") {
+    const raw = await req.text()
+    const priv = Deno.env.get("TRIPAY_PRIVATE_KEY") || ""
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(priv), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
+    const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(raw))
+    const signature = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("")
+    if (!priv || signature !== (req.headers.get("x-callback-signature") || "")) return new Response("signature", { status: 401 })
+    const body = JSON.parse(raw) as { status?: string; merchant_ref?: string; amount?: number }
+    if (body.status === "PAID") await tandai(String(body.merchant_ref), Math.round(Number(body.amount || 0)), "QRIS", `tripay:${body.merchant_ref}`)
+    return Response.json({ ok: true })
+  }
+  if (provider === "duitku") {
+    const body = await req.json().catch(() => ({})) as { merchantCode?: string; amount?: string; merchantOrderId?: string; resultCode?: string; signature?: string }
+    const api = Deno.env.get("DUITKU_API_KEY") || ""
+    const signature = md5(`${body.merchantCode || ""}${body.amount || ""}${body.merchantOrderId || ""}${api}`)
+    if (!api || signature !== body.signature) return new Response("signature", { status: 401 })
+    if (body.resultCode === "00") await tandai(String(body.merchantOrderId), Math.round(Number(body.amount || 0)), "QRIS", `duitku:${body.merchantOrderId}`)
     return Response.json({ ok: true })
   }
   const body = await req.json().catch(() => ({})) as { action?: string; invoiceId?: string }
