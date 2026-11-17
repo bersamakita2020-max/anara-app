@@ -135,38 +135,80 @@ function BoardBlock() {
   )
 }
 
+function KartuOrder({ item }: { item: ReturnType<typeof visibleOrders>[number] }) {
+  const tone = dueTone(item.dueDate)
+  return (
+    <Link className="ticket order-card" to={`/app/order/${item.id}`}>
+      <span className="ticket-top">
+        <span className={`badge ${tone === 'late' ? 'late' : tone === 'soon' ? 'soon' : item.brand === 'edukasi' ? 'edu' : item.brand}`}>{tone === 'late' ? 'Terlambat' : tone === 'soon' ? 'Segera' : item.brand}</span>
+      </span>
+      <b>{item.title}</b>
+      <div className="meta">{item.code}<br />{tanggal(item.dueDate)} · {rupiah(item.price)}</div>
+    </Link>
+  )
+}
+
 export function OrdersPage() {
   const { state } = useAnara()
   const [brand, setBrand] = useState('semua')
-  const orders = visibleOrders(state).filter((item) => brand === 'semua' || item.brand === brand)
+  const [stage, setStage] = useState<Stage | 'semua'>('semua')
+  const [query, setQuery] = useState('')
+  const [sheet, setSheet] = useState(false)
+  const orders = visibleOrders(state).filter((item) => {
+    const merek = brand === 'semua' || item.brand === brand
+    const tahap = stage === 'semua' || item.stage === stage
+    const cari = !query || `${item.code} ${item.title}`.toLowerCase().includes(query.toLowerCase())
+    return merek && tahap && cari
+  })
   return (
     <Shell>
       <h1>Papan order</h1>
-      <div className="tabs" role="tablist">
-        {['semua', 'studio', 'edukasi', 'tech'].map((item) => (
-          <button key={item} className={brand === item ? 'tab on' : 'tab'} type="button" onClick={() => setBrand(item)}>{item}</button>
-        ))}
+      <div className="order-tools">
+        <div className="tabs order-desk" role="tablist">
+          {['semua', 'studio', 'edukasi', 'tech'].map((item) => (
+            <button key={item} className={brand === item ? 'tab on' : 'tab'} type="button" onClick={() => setBrand(item)}>{item}</button>
+          ))}
+        </div>
+        <button className="btn btn-ghost order-mobile" type="button" onClick={() => setSheet(true)}>Cari & saring</button>
       </div>
-      <div className="kanban">
-        {STAGE_FLOW.map((stage) => (
-          <div className="col" key={stage}>
-            <h4>{STAGE_LABEL[stage]}</h4>
-            {orders.filter((item) => item.stage === stage).map((item) => {
-              const tone = dueTone(item.dueDate)
-              return (
-                <Link className="ticket" key={item.id} to={`/app/order/${item.id}`}>
-                  <span className="ticket-top">
-                    <span className={`badge ${tone === 'late' ? 'late' : tone === 'soon' ? 'soon' : item.brand === 'edukasi' ? 'edu' : item.brand}`}>{tone === 'late' ? 'Terlambat' : tone === 'soon' ? 'Segera' : item.brand}</span>
-                  </span>
-                  <b>{item.title}</b>
-                  <div className="meta">{item.code}<br />{tanggal(item.dueDate)} · {rupiah(item.price)}</div>
-                </Link>
-              )
-            })}
+      <div className="kanban order-desk">
+        {STAGE_FLOW.map((tahap) => (
+          <div className="col" key={tahap}>
+            <h4>{STAGE_LABEL[tahap]}</h4>
+            {orders.filter((item) => item.stage === tahap).map((item) => <KartuOrder key={item.id} item={item} />)}
           </div>
         ))}
       </div>
-      {orders.length === 0 ? <div className="empty"><p>Belum ada order pada saringan ini.</p><Link className="btn btn-grad btn-sm" to="/">Buka katalog</Link></div> : null}
+      <div className="order-mobile">
+        <div className="stage-scroll" role="tablist" aria-label="Tahap order">
+          <button className={stage === 'semua' ? 'tab on' : 'tab'} type="button" onClick={() => setStage('semua')}>Semua</button>
+          {STAGE_FLOW.map((tahap) => (
+            <button key={tahap} className={stage === tahap ? 'tab on' : 'tab'} type="button" onClick={() => setStage(tahap)}>{STAGE_LABEL[tahap]}</button>
+          ))}
+        </div>
+        <div className="order-list">
+          {orders.map((item) => <KartuOrder key={item.id} item={item} />)}
+        </div>
+      </div>
+      {orders.length === 0 ? <div className="empty"><p>Belum ada order pada saringan ini.</p><Link className="btn btn-grad" to="/pesan">Order baru</Link></div> : null}
+      <Link className="fab" to="/pesan">Order baru</Link>
+      {sheet ? (
+        <div className="nav-sheet">
+          <button className="palette-bg" type="button" aria-label="Tutup saringan" onClick={() => setSheet(false)} />
+          <div className="nav-sheet-card">
+            <h2>Cari dan saring</h2>
+            <label htmlFor="cari-order">Kata kunci</label>
+            <input id="cari-order" className="field" value={query} placeholder="Kode atau nama layanan" onChange={(event) => setQuery(event.target.value)} />
+            <p>Unit</p>
+            <div className="tabs">
+              {['semua', 'studio', 'edukasi', 'tech'].map((item) => (
+                <button key={item} className={brand === item ? 'tab on' : 'tab'} type="button" onClick={() => setBrand(item)}>{item}</button>
+              ))}
+            </div>
+            <button className="btn btn-grad btn-wide" type="button" onClick={() => setSheet(false)}>Terapkan</button>
+          </div>
+        </div>
+      ) : null}
     </Shell>
   )
 }
@@ -176,48 +218,65 @@ export function OrderDetailPage() {
   const { state, act } = useAnara()
   const order = state.orders.find((item) => item.id === id)
   const [note, setNote] = useState('')
+  const [tab, setTab] = useState<'ringkas' | 'sop' | 'bayar' | 'dokumen' | 'riwayat'>('ringkas')
   if (!order) return <Shell><h1>Order tidak ditemukan</h1></Shell>
   const client = state.clients.find((item) => item.id === order.clientId)
   const worker = state.workers.find((item) => item.id === order.assigneeId)
   const checks = state.checks.filter((item) => item.orderId === order.id && item.stage === order.stage)
   const invoices = state.invoices.filter((item) => item.orderId === order.id)
   const role = state.session?.role
+  const indeksTahap = STAGE_FLOW.indexOf(order.stage)
+  const berikutnya = indeksTahap >= 0 ? STAGE_FLOW[indeksTahap + 1] : undefined
+  const pembayaran = state.payments.filter((item) => item.orderId === order.id)
+  const kontrak = state.contracts.filter((item) => item.orderId === order.id)
+  const riwayat = state.events.filter((item) => item.orderId === order.id)
   return (
     <Shell>
       <p><Link to="/app/order">Kembali ke papan</Link></p>
       <h1>{order.title}</h1>
-      <p style={{ color: 'var(--muted)' }}>{order.code} · {STAGE_LABEL[order.stage]} · {rupiah(order.price)} · DP {order.dpPercent}% · revisi {order.revisionCount}/{order.revisionLimit}</p>
-      <div className="grid-dash" style={{ marginTop: 16 }}>
+      <p style={{ color: 'var(--muted)' }}>{order.code} · {STAGE_LABEL[order.stage]} · {rupiah(order.price)}</p>
+      <div className="stage-scroll" role="tablist" aria-label="Bagian order">
+        {([['ringkas', 'Ringkasan'], ['sop', 'SOP'], ['bayar', 'Pembayaran'], ['dokumen', 'Dokumen'], ['riwayat', 'Riwayat']] as const).map(([key, label]) => (
+          <button key={key} className={tab === key ? 'tab on' : 'tab'} type="button" onClick={() => setTab(key)}>{label}</button>
+        ))}
+      </div>
+      {tab === 'ringkas' ? (
         <div className="card">
-          <h3>Brief</h3>
           <p>{order.brief || 'Belum ada uraian.'}</p>
-          <p>Klien: {client?.name} · {client?.whatsapp}</p>
+          <p>Klien: {client?.name || '—'} · {client?.whatsapp || '—'}</p>
           <p>Pengerja: {worker?.name || 'Belum ditugaskan'}</p>
-          <p>Tenggat: {tanggal(order.dueDate)} {order.referrer ? `· Perujuk ${order.referrer}` : ''}</p>
+          <p>Tenggat: {tanggal(order.dueDate)} · DP {order.dpPercent}% · revisi {order.revisionCount}/{order.revisionLimit}</p>
           {order.studentStatus ? <p>Status {order.studentStatus} · {order.campus} · {order.scriptType}</p> : null}
           {order.warrantyUntil ? <p>Garansi Tech sampai {tanggal(order.warrantyUntil)}</p> : null}
-          <label htmlFor="tahap">Geser tahap</label>
+          {order.referrer ? <p>Perujuk {order.referrer}</p> : null}
+          {berikutnya ? <button className="btn btn-grad btn-wide" type="button" onClick={() => void act({ type: 'move-stage', orderId: order.id, stage: berikutnya })}>Lanjut ke {STAGE_LABEL[berikutnya]}</button> : null}
+          <label htmlFor="tahap">Pindah ke tahap lain</label>
           <select id="tahap" className="field" value={order.stage} onChange={(event) => void act({ type: 'move-stage', orderId: order.id, stage: event.target.value as Stage })}>
             {Object.entries(STAGE_LABEL).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
           </select>
-          {role === 'owner' ? <button className="btn btn-ghost btn-sm" type="button" onClick={() => void act({ type: 'move-stage', orderId: order.id, stage: order.stage === 'selesai' ? 'selesai' : 'serah_terima', override: true })}>Pengecualian pemilik ke serah terima</button> : null}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-ghost btn-sm" type="button" onClick={() => void act({ type: 'add-revision', orderId: order.id, note })}>Catat revisi</button>
-            <button className="btn btn-ghost btn-sm" type="button" onClick={() => void act({ type: 'cancel-order', orderId: order.id, reason: note || 'Dibatalkan dari dasbor' })}>Batalkan</button>
-          </div>
+          {role === 'owner' ? <button className="btn btn-ghost" type="button" onClick={() => void act({ type: 'move-stage', orderId: order.id, stage: 'serah_terima', override: true })}>Pengecualian pemilik ke serah terima</button> : null}
           <label htmlFor="catatan">Catatan</label>
           <input className="field" id="catatan" value={note} onChange={(event) => setNote(event.target.value)} />
+          <div className="stack-actions">
+            <button className="btn btn-ghost" type="button" onClick={() => void act({ type: 'add-revision', orderId: order.id, note })}>Catat revisi</button>
+            <button className="btn btn-ghost" type="button" onClick={() => void act({ type: 'cancel-order', orderId: order.id, reason: note || 'Dibatalkan dari dasbor' })}>Batalkan</button>
+          </div>
           {role === 'owner' || role === 'finance' ? (
-            <label>Tugaskan
-              <select className="field" value={order.assigneeId} onChange={(event) => void act({ type: 'assign', orderId: order.id, workerId: event.target.value })}>
+            <>
+              <label htmlFor="tugas">Tugaskan</label>
+              <select id="tugas" className="field" value={order.assigneeId} onChange={(event) => void act({ type: 'assign', orderId: order.id, workerId: event.target.value })}>
                 {state.workers.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
               </select>
-            </label>
+            </>
           ) : null}
+        </div>
+      ) : null}
+      {tab === 'sop' ? (
+        <div className="card">
           <h3>Checklist {STAGE_LABEL[order.stage]}</h3>
           {checks.length === 0 ? <p className="empty">Tidak ada checklist pada tahap ini.</p> : null}
           {checks.map((item) => (
-            <label key={item.id} style={{ display: 'flex', gap: 8, fontWeight: 400 }}>
+            <label key={item.id} className="check">
               <input type="checkbox" checked={item.done} onChange={() => void act({ type: 'toggle-check', checkId: item.id })} />
               <span>{item.sop} · {item.label}</span>
             </label>
@@ -231,28 +290,29 @@ export function OrderDetailPage() {
           }}>
             <label htmlFor="file">Unggah nama berkas</label>
             <input id="file" name="file" className="field" type="file" />
-            <button className="btn btn-ghost btn-sm" type="submit">Simpan nama berkas</button>
+            <button className="btn btn-ghost" type="submit">Simpan nama berkas</button>
           </form>
         </div>
-        <div>
-          <div className="card">
-            <h3>Tagihan</h3>
-            {invoices.length === 0 ? <p className="empty">Tagihan terbit setelah kontrak disetujui.</p> : null}
-            {invoices.map((invoice) => (
-              <p key={invoice.id}>{invoice.number}<br />{invoice.kind} · {rupiah(invoice.amount)} · {invoice.status}</p>
-            ))}
-            {state.contracts.filter((item) => item.orderId === order.id).map((item) => (
-              <p key={item.id}><Link to={`/app/kontrak?id=${item.id}`}>{item.number || item.title}</Link> · {item.status}</p>
-            ))}
-          </div>
-          <div className="card" style={{ marginTop: 12 }}>
-            <h3>Riwayat</h3>
-            {state.events.filter((item) => item.orderId === order.id).slice(0, 8).map((item) => (
-              <p key={item.id} style={{ fontSize: 13 }}>{tanggal(item.at)} · {STAGE_LABEL[item.stage]} · {item.note}</p>
-            ))}
-          </div>
+      ) : null}
+      {tab === 'bayar' ? (
+        <div className="card">
+          {invoices.length === 0 ? <p className="empty">Tagihan terbit setelah kontrak disetujui.</p> : null}
+          {invoices.map((invoice) => <p key={invoice.id}><Link to={`/invoice/${invoice.id}`}>{invoice.number}</Link><br />{invoice.kind} · {rupiah(invoice.amount)} · {invoice.status}</p>)}
+          {pembayaran.map((item) => <p key={item.id}>{rupiah(item.amount)} · {item.status} · {item.proofName || 'tanpa bukti'}</p>)}
         </div>
-      </div>
+      ) : null}
+      {tab === 'dokumen' ? (
+        <div className="card">
+          {kontrak.length === 0 ? <p className="empty">Belum ada kontrak untuk order ini.</p> : null}
+          {kontrak.map((item) => <p key={item.id}><Link to={`/setujui/${item.id}`}>{item.number || item.title}</Link> · {item.status}</p>)}
+        </div>
+      ) : null}
+      {tab === 'riwayat' ? (
+        <div className="card">
+          {riwayat.length === 0 ? <p className="empty">Belum ada jejak.</p> : null}
+          {riwayat.map((item) => <p key={item.id}>{tanggal(item.at)} · {STAGE_LABEL[item.stage]} · {item.note}</p>)}
+        </div>
+      ) : null}
     </Shell>
   )
 }

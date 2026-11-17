@@ -240,9 +240,17 @@ table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space
 .theme-btn{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 12px;cursor:pointer;font-size:12px;font-family:Sora,sans-serif}
 .mob-nav{display:none}
 
+.btn-masuk{min-height:44px;min-width:44px}
+.order-mobile,.fab{display:none}
+.stage-scroll{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin:8px 0 12px}
+.stage-scroll .tab{scroll-snap-align:start;flex:0 0 auto;min-height:44px}
+.stack-actions{display:flex;flex-wrap:wrap;gap:8px}
+.stack-actions .btn{min-height:44px}
+
 @media (max-width: 900px){
-  .nav{top:10px}
-  .nav-links,.nav-cta .btn-ghost{display:none}
+  .nav{top:10px;z-index:60}
+  .nav-links,.nav-cta .btn-ghost,.nav-cta .btn-grad:not(.btn-masuk){display:none}
+  .nav-cta .btn-masuk{display:inline-flex !important}
   .nav.open .nav-links{display:flex;flex-direction:column;position:absolute;top:68px;left:8px;right:8px;background:var(--paper);padding:12px;border-radius:20px;border:1px solid var(--line);box-shadow:var(--shadow)}
   .hamburger{display:flex}
   .hero{padding:16px 0 8px}
@@ -262,8 +270,23 @@ table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space
   .bento .tile .desc, .bento .tile p{padding-right:12px}
   .kpis{grid-template-columns:1fr 1fr}
   .nav-cta .install-wrap{display:none}
-  .kanban{display:flex;gap:12px;overflow-x:auto;width:100%;align-items:flex-start}
-  .col{flex:0 0 240px;min-width:240px}
+  html,body{overflow-x:hidden}
+  .main,.app-shell,.kanban,.top-actions{max-width:100%}
+  .order-desk{display:none !important}
+  .order-mobile{display:block}
+  .order-mobile.btn{display:inline-flex;min-height:44px}
+  .order-list{display:grid;gap:10px}
+  .order-card{width:100%}
+  .fab{display:inline-flex;position:fixed;left:16px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:45;min-height:48px}
+  .pub-nav,.mob-nav{bottom:max(12px, env(safe-area-inset-bottom))}
+  .table-wrap{overflow:visible}
+  table.data thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  table.data,table.data tbody,table.data tr,table.data td{display:block;width:100%}
+  table.data tr{border:1px solid var(--line);border-radius:16px;margin:0 0 12px;padding:8px 10px;background:var(--paper)}
+  table.data td{border:0;white-space:normal;overflow-wrap:anywhere}
+  .top-actions .btn,.nav-sheet-card .btn{min-height:44px}
+  .kanban{display:flex;gap:12px;overflow-x:auto;width:100%;max-width:100%;align-items:flex-start}
+  .col{flex:0 0 min(100%,280px);min-width:0}
   section{padding:42px 0}
   .wrap{width:min(1180px,calc(100% - 24px))}
   .topbar{align-items:flex-start;flex-direction:column}
