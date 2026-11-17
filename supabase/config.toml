@@ -1,0 +1,24 @@
+project_id = "wfmtjonhuvcqbbyoubbt"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["extensions", "private"]
+
+[db]
+major_version = 15
+
+[functions.wa-notify]
+verify_jwt = true
+
+[functions.email-notify]
+verify_jwt = true
+
+[functions.cron-daily]
+verify_jwt = false
+
+[functions.cron-monthly]
+verify_jwt = false
+
+[functions.cron-weekly]
+verify_jwt = false
