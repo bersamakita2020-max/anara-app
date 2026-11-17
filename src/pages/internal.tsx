@@ -93,10 +93,11 @@ function BoardBlock() {
                 <div className="meta">{item.code} · {rupiah(item.price)}</div>
               </Link>
             ))}
-            {orders.filter((item) => column.stages.includes(item.stage)).length === 0 ? <p className="empty">Kosong</p> : null}
+            {orders.filter((item) => column.stages.includes(item.stage)).length === 0 ? <p className="empty">Belum ada order</p> : null}
           </div>
         ))}
       </div>
+      {orders.length === 0 ? <div className="empty"><p>Belum ada order.</p><Link className="btn btn-grad btn-sm" to="/">Buka katalog</Link></div> : null}
     </div>
   )
 }
@@ -123,7 +124,6 @@ export function OrdersPage() {
                 <Link className="ticket" key={item.id} to={`/app/order/${item.id}`}>
                   <span className="ticket-top">
                     <span className={`badge ${tone === 'late' ? 'late' : tone === 'soon' ? 'soon' : item.brand === 'edukasi' ? 'edu' : item.brand}`}>{tone === 'late' ? 'Terlambat' : tone === 'soon' ? 'Segera' : item.brand}</span>
-                    {item.sample ? <span className="demo-tag" /> : null}
                   </span>
                   <b>{item.title}</b>
                   <div className="meta">{item.code}<br />{tanggal(item.dueDate)} · {rupiah(item.price)}</div>
@@ -133,7 +133,7 @@ export function OrdersPage() {
           </div>
         ))}
       </div>
-      {orders.length === 0 ? <p className="empty">Tidak ada order pada saringan ini.</p> : null}
+      {orders.length === 0 ? <div className="empty"><p>Belum ada order pada saringan ini.</p><Link className="btn btn-grad btn-sm" to="/">Buka katalog</Link></div> : null}
     </Shell>
   )
 }
@@ -153,7 +153,7 @@ export function OrderDetailPage() {
     <Shell>
       <p><Link to="/app/order">Kembali ke papan</Link></p>
       <h1>{order.title}</h1>
-      <p style={{ color: 'var(--muted)' }}>{order.code} {order.sample ? <span className="demo-tag" /> : null} · {STAGE_LABEL[order.stage]} · {rupiah(order.price)} · DP {order.dpPercent}% · revisi {order.revisionCount}/{order.revisionLimit}</p>
+      <p style={{ color: 'var(--muted)' }}>{order.code} · {STAGE_LABEL[order.stage]} · {rupiah(order.price)} · DP {order.dpPercent}% · revisi {order.revisionCount}/{order.revisionLimit}</p>
       <div className="grid-dash" style={{ marginTop: 16 }}>
         <div className="card">
           <h3>Brief</h3>
@@ -238,7 +238,7 @@ export function PeoplePage({ kind }: { kind: 'klien' | 'pekerja' }) {
               <thead><tr><th>Nama</th><th>WhatsApp</th><th>Instansi</th><th>Status</th></tr></thead>
               <tbody>
                 {state.clients.map((item) => (
-                  <tr key={item.id}><td>{item.name} {item.sample ? <span className="demo-tag" /> : null}</td><td>{item.whatsapp}</td><td>{item.institution || '—'}</td><td>{item.studentStatus || '—'}</td></tr>
+                  <tr key={item.id}><td>{item.name}</td><td>{item.whatsapp}</td><td>{item.institution || '—'}</td><td>{item.studentStatus || '—'}</td></tr>
                 ))}
               </tbody>
             </table>
@@ -250,7 +250,7 @@ export function PeoplePage({ kind }: { kind: 'klien' | 'pekerja' }) {
             <thead><tr><th>Nama</th><th>Peran</th><th>Order aktif</th></tr></thead>
             <tbody>
               {state.workers.map((item) => (
-                <tr key={item.id}><td>{item.name} {item.sample ? <span className="demo-tag" /> : null}</td><td>{item.title}</td><td>{state.orders.filter((order) => order.assigneeId === item.id && order.stage !== 'selesai' && order.stage !== 'batal').length}</td></tr>
+                <tr key={item.id}><td>{item.name}</td><td>{item.title}</td><td>{state.orders.filter((order) => order.assigneeId === item.id && order.stage !== 'selesai' && order.stage !== 'batal').length}</td></tr>
               ))}
             </tbody>
           </table>
@@ -440,7 +440,7 @@ export function ContractPage() {
           <div className="card">
             <h3>Status</h3>
             <p>{contract ? `${contract.status}${contract.signerName ? ` · ${contract.signerName}` : ''}` : '—'}</p>
-            {contract?.otpHint && state.session?.role !== 'worker' ? <p><span className="demo-tag" /> Kode untuk diteruskan: {contract.otpHint}</p> : null}
+            {contract?.otpHint && state.session?.role !== 'worker' ? <p>Kode untuk diteruskan lewat WhatsApp: {contract.otpHint}</p> : null}
             {contract?.signedAt ? <p>Waktu {tanggal(contract.signedAt)} · IP {contract.ip || 'tidak tersedia'}</p> : null}
             {contract?.orderId ? <p><Link to={`/setujui/${contract.id}`}>Tautan persetujuan klien</Link></p> : null}
           </div>
@@ -512,7 +512,7 @@ export function MonitorPage() {
       <div className="grid-dash">
         <div className="card">
           <h3>Rata-rata hari per tahap</h3>
-          {sla.map((item) => <p key={item.stage}>{STAGE_LABEL[item.stage as Stage] || item.stage}: {item.n ? `${item.days} hari (${item.n} contoh)` : 'belum cukup data'}</p>)}
+          {sla.map((item) => <p key={item.stage}>{STAGE_LABEL[item.stage as Stage] || item.stage}: {item.n ? `${item.days} hari (${item.n} order)` : 'belum cukup data'}</p>)}
         </div>
         <div className="card">
           <h3>Pembayaran dan revisi</h3>
@@ -614,7 +614,7 @@ export function ReportPage() {
         <Group title="Per klien" rows={report.byClient} />
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '8px 0 16px' }}>
-        <button className="btn btn-grad btn-sm" type="button" onClick={() => downloadCsv(`laporan-anara-${filter.from}.csv`, headers, rows)}>Unduh CSV</button>
+        <button className="btn btn-grad btn-sm" type="button" onClick={() => downloadCsv(`laporan-anara-${filter.from}.csv`, headers, rows)}>Unduh Excel</button>
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => void downloadTablePdf({ filename: `laporan-anara-${filter.from}.pdf`, title: 'Laporan ANARA', subtitle: `${filter.from} s.d. ${filter.to}`, headers, rows: rows.map((row) => row.map(String)) })}>Unduh PDF</button>
         <button className="btn btn-ghost btn-sm" type="button" onClick={() => void act({ type: 'build-settlement', period: filter.from.slice(0, 7) })}>Susun settlement bulan ini</button>
       </div>
@@ -701,7 +701,7 @@ export function PortfolioAdminPage() {
           <article className="card" key={item.id}>
             <h3>{item.title}</h3>
             <p>{item.caption}</p>
-            <p>{item.published ? 'Tayang' : 'Disembunyikan'} {item.sample ? <span className="demo-tag" /> : null}</p>
+            <p>{item.published ? 'Tayang' : 'Disembunyikan'}</p>
           </article>
         ))}
       </div>
@@ -724,7 +724,7 @@ export function PortfolioAdminPage() {
 }
 
 export function SettingsPage() {
-  const { state, act, mode } = useAnara()
+  const { state, act } = useAnara()
   const money = moneySnapshot(state)
   const settings = state.settings
   const owner = state.session?.role === 'owner'
@@ -781,7 +781,6 @@ export function SettingsPage() {
           </form>
         ))}
       </div>
-      {mode === 'demo' ? <button className="btn btn-ghost" type="button" style={{ marginTop: 16 }} onClick={() => void act({ type: 'reset-demo' })}>Kembalikan data contoh</button> : null}
     </Shell>
   )
 }

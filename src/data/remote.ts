@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { AppState, Client, Role } from '../types'
-import { createDemoState } from './seed'
+import { defaultSettings, emptyState } from './defaults'
 
 function rows<T>(value: { data: T[] | null; error: { message: string } | null }, optional = false): T[] {
   if (value.error) {
@@ -11,10 +11,9 @@ function rows<T>(value: { data: T[] | null; error: { message: string } | null },
 }
 
 export async function loadRemote(): Promise<AppState> {
-  if (!supabase) throw new Error('Supabase tidak diatur')
-  const base = createDemoState()
+  if (!supabase) throw new Error('Server belum dikonfigurasi.')
+  const base = emptyState()
   const packages = rows(await supabase.from('packages').select('*').order('sort'))
-  if (!packages.length) throw new Error('Paket belum ada')
   const [clients, workers, orders, events, checks, invoices, payments, splits, expenses, templates, contracts, portfolio, testimonials, audit, notices, rules, settingsRows, settlements, outbox] =
     await Promise.all([
       supabase.from('clients').select('*'),
@@ -78,7 +77,7 @@ export async function loadRemote(): Promise<AppState> {
       ownerProfit: Number(row.owner_profit), partnerProfit: Number(row.partner_profit), workerName: row.worker_name || '', at: row.created_at,
     })),
     expenses: rows(expenses, true).map((row) => ({ id: String(row.id), date: row.spent_on, category: row.category, amount: Number(row.amount), memo: row.memo || '', sample: Boolean(row.sample) })),
-    templates: rows(templates, true).length ? rows(templates, true).map((row) => ({ key: row.key, name: row.name, prefix: row.prefix || '', body: row.body })) : base.templates,
+    templates: rows(templates, true).map((row) => ({ key: row.key, name: row.name, prefix: row.prefix || '', body: row.body })),
     contracts: rows(contracts, true).map((row) => ({
       id: String(row.id), orderId: row.order_id ? String(row.order_id) : null, templateKey: row.template_key, number: row.number || '', title: row.title || '',
       body: row.body || '', status: row.status, signerName: row.signer_name || '', signedAt: row.signed_at, ip: row.ip || '', userAgent: row.user_agent || '',
@@ -88,8 +87,8 @@ export async function loadRemote(): Promise<AppState> {
     testimonials: rows(testimonials, true).map((row) => ({ id: String(row.id), name: row.name, role: row.role || '', quote: row.quote, stars: Number(row.stars || 5), published: Boolean(row.published), sample: Boolean(row.sample) })),
     audit: rows(audit, true).map((row) => ({ id: String(row.id), actor: row.actor_name || '', action: row.action, entity: row.entity, detail: row.detail || '', at: row.created_at })),
     notices: rows(notices, true).map((row) => ({ id: String(row.id), title: row.title, body: row.body || '', href: row.href || '', read: Boolean(row.read), at: row.created_at, forRole: row.for_role || 'semua' })),
-    rules: rows(rules, true).length ? rows(rules, true).map((row) => ({ key: row.key, title: row.title, detail: row.detail || '', message: row.message || '', enabled: Boolean(row.enabled), group: row.group_name || 'pemberitahuan' })) : base.rules,
-    settings: settings?.payload && typeof settings.payload === 'object' ? { ...base.settings, ...(settings.payload as AppState['settings']) } : base.settings,
+    rules: rows(rules, true).map((row) => ({ key: row.key, title: row.title, detail: row.detail || '', message: row.message || '', enabled: Boolean(row.enabled), group: row.group_name || 'pemberitahuan' })),
+    settings: settings?.payload && typeof settings.payload === 'object' ? { ...defaultSettings(), ...(settings.payload as AppState['settings']) } : base.settings,
     settlements: rows(settlements, true).map((row) => ({ id: String(row.id), period: row.period, status: row.status, note: row.note || '', approvedAt: row.approved_at })),
     outbox: rows(outbox, true).map((row) => ({ id: String(row.id), channel: row.channel, to: row.to_address || '', body: row.body || '', href: row.href || '', status: row.status, at: row.created_at })),
     session: user,

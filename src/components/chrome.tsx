@@ -19,10 +19,6 @@ export function Aurora() {
   )
 }
 
-export function DemoMark() {
-  return <span className="demo-tag" />
-}
-
 export function Flash() {
   const { flash, clearFlash } = useAnara()
   if (!flash) return null
@@ -34,7 +30,7 @@ export function Flash() {
 }
 
 export function PublicShell({ children }: { children: ReactNode }) {
-  const { banner } = useAnara()
+  const { loadError } = useAnara()
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -63,7 +59,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <InstallBanner />
-      {banner ? <div className="banner" role="status"><strong>Contoh. </strong>{banner}</div> : null}
+      {loadError ? <div className="banner" role="alert">{loadError}</div> : null}
       <main id="isi">{children}</main>
       <footer className="foot">
         <div className="foot-in">
@@ -117,7 +113,7 @@ const LINKS: { to: string; label: string; icon: string; roles: Role[] }[] = [
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { state, banner, act } = useAnara()
+  const { state, loadError, act } = useAnara()
   const navigate = useNavigate()
   const role = state.session?.role
   if (!state.session || role === 'client') {
@@ -158,7 +154,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </aside>
         <div className="main" id="isi">
-          {banner ? <div className="banner" role="status" style={{ width: 'auto', margin: '0 0 14px' }}><strong>Contoh. </strong>{banner}</div> : null}
+          {loadError ? <div className="banner" role="alert" style={{ width: 'auto', margin: '0 0 14px' }}>{loadError}</div> : null}
           <div className="topbar">
             <div>
               <p style={{ color: 'var(--muted)', fontSize: 13 }}>ANARA, Beyond Value</p>
