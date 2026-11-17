@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { PublicShell } from '../components/chrome'
+import { InstallButton } from '../components/install'
 import { useAnara } from '../data/store'
 import { callRpc } from '../data/remote'
 import { TRACK_HINT } from '../data/seed'
@@ -30,6 +31,7 @@ export function HomePage() {
             <p className="lead">Studio visual, pendampingan akademik, dan solusi digital dalam satu tempat. Pesan dari ponsel atau komputer, dengan kontrak dan pembayaran yang tertib.</p>
             <div className="hero-actions">
               <a className="btn btn-grad" href="#harga">Lihat layanan dan harga</a>
+              <InstallButton className="btn btn-grad" placement="below" />
               <a className="btn btn-ghost" href="https://wa.me/625811699699">Chat WhatsApp 0581-1699-699</a>
             </div>
             <div className="chips">

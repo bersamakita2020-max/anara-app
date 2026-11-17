@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import icon from '../assets/brand/ikon-a-gradien.svg'
 import wordmark from '../assets/brand/wordmark-hitam.svg'
+import { InstallBanner, InstallButton } from './install'
 import { useAnara } from '../data/store'
 import type { Role } from '../types'
 
@@ -53,6 +54,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="nav-cta">
             <NavLink className="btn btn-ghost btn-sm" to="/masuk">Masuk tim</NavLink>
+            <InstallButton />
             <a className="btn btn-grad btn-sm" href={WA} target="_blank" rel="noreferrer">WhatsApp</a>
             <button className="hamburger" type="button" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
               <span /><span /><span />
@@ -60,6 +62,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+      <InstallBanner />
       {banner ? <div className="banner" role="status"><strong>Contoh. </strong>{banner}</div> : null}
       <main id="isi">{children}</main>
       <footer className="foot">
@@ -146,6 +149,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
             <NavLink to="/">Lihat katalog</NavLink>
           </nav>
+          <div className="install-slot">
+            <InstallButton className="btn btn-grad btn-sm" placement="below" />
+          </div>
           <div className="role">
             <b>{state.session.name}</b>
             {role === 'owner' ? 'Pemilik' : role === 'finance' ? 'Keuangan dan Admin WA' : role === 'worker' ? 'Pekerja' : 'Admin media sosial'}
@@ -158,6 +164,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <p style={{ color: 'var(--muted)', fontSize: 13 }}>ANARA, Beyond Value</p>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <InstallButton />
               <ThemeButton />
               <NavLink className="btn btn-ghost btn-sm" to="/app/monitoring">Pemberitahuan{unread ? ` (${unread})` : ''}</NavLink>
               <button className="btn btn-ghost btn-sm" type="button" onClick={() => { void act({ type: 'logout' }); navigate('/masuk') }}>Keluar</button>
