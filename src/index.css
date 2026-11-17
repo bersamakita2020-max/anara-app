@@ -260,6 +260,7 @@ table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space
   .wa-float span{display:none}
   .bento .tile .desc, .bento .tile p{padding-right:12px}
   .kpis{grid-template-columns:1fr 1fr}
+  .nav-cta .install-wrap{display:none}
   .kanban{display:flex;gap:12px;overflow-x:auto;width:100%;align-items:flex-start}
   .col{flex:0 0 240px;min-width:240px}
   section{padding:42px 0}
@@ -302,6 +303,16 @@ html[data-theme="dark"] .side .wm,html[data-theme="dark"] .brand .wm{filter:inve
 .badge.edukasi{background:#D9F3EA;color:var(--edu)}
 .pkg.edukasi::before{background:var(--edu)}
 .pkg.edukasi .unit-tag{color:var(--edu)}
+
+.install-wrap{position:relative;display:inline-flex;max-width:100%}
+.install-wrap.below{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.install-hint{position:absolute;z-index:40;top:calc(100% + 8px);right:0;width:min(280px,78vw);background:#fff;color:#0A0A0B;border:1px solid rgba(124,58,237,.16);border-radius:16px;padding:12px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.45;box-shadow:var(--shadow)}
+.install-wrap.below .install-hint{position:static;width:auto}
+.install-banner{position:relative;z-index:3;margin:12px auto 0;width:min(1180px,calc(100% - 28px));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid rgba(124,58,237,.14);border-radius:18px;padding:10px 12px;box-shadow:var(--shadow-sm)}
+.install-banner p{margin:0;font-size:13.5px}
+.install-banner > div{display:flex;gap:8px;align-items:center}
+.side .install-slot{padding:4px 4px 10px}
+.side .install-slot .btn{width:100%}
 
 @media print{
   .nav,.side,.mob-nav,.pub-nav,.wa-float,.aurora,.no-print{display:none !important}
