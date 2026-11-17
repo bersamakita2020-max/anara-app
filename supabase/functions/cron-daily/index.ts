@@ -12,5 +12,20 @@ Deno.serve(async (req) => {
     const direct = await supabase.schema("private").rpc("run_daily_maintenance")
     if (direct.error) return Response.json({ ok: false, error: error.message }, { status: 500 })
   }
-  return Response.json({ ok: true })
+  const token = Deno.env.get("FONNTE_TOKEN") || ""
+  const pending = await supabase.from("wa_outbox").select("id,to_address,body").eq("status", "siap").limit(20)
+  let sent = 0
+  if (token) {
+    for (const row of pending.data || []) {
+      const target = String(row.to_address || "").replace(/\D/g, "")
+      const response = await fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        headers: { Authorization: token },
+        body: new URLSearchParams({ target, message: String(row.body || "") }),
+      })
+      await supabase.from("wa_outbox").update({ status: response.ok ? "terkirim" : "gagal" }).eq("id", row.id)
+      if (response.ok) sent += 1
+    }
+  }
+  return Response.json({ ok: true, fonnte: Boolean(token), sent, queued: pending.data?.length || 0 })
 })

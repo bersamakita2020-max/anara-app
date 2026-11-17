@@ -1,10 +1,12 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ActionButton } from '../components/ActionButton'
 import { AppShell } from '../components/chrome'
+import { CurrencyInput } from '../components/CurrencyInput'
 import { useAnara } from '../data/store'
 import { downloadCsv } from '../lib/csv'
 import { downloadTablePdf, downloadTextPdf } from '../lib/pdf'
-import { rupiah, tanggal, dueTone, todayISO } from '../lib/format'
+import { phoneKey, rupiah, tanggal, dueTone, todayISO } from '../lib/format'
 import { buildAlerts, buildReport, defaultFilter, moneySnapshot, slaByStage, visibleOrders, type ReportFilter } from '../lib/insights'
 import { STAGE_FLOW, STAGE_LABEL } from '../lib/sop'
 import { TARGET_MIN_MONTHS } from '../lib/finance'
@@ -237,8 +239,11 @@ export function PeoplePage({ kind }: { kind: 'klien' | 'pekerja' }) {
             <table className="data">
               <thead><tr><th>Nama</th><th>WhatsApp</th><th>Instansi</th><th>Status</th></tr></thead>
               <tbody>
-                {state.clients.map((item) => (
-                  <tr key={item.id}><td>{item.name}</td><td>{item.whatsapp}</td><td>{item.institution || '—'}</td><td>{item.studentStatus || '—'}</td></tr>
+                {state.clients.filter((item, index, all) => {
+                  const key = phoneKey(item.whatsapp) || item.email || item.id
+                  return all.findIndex((row) => (phoneKey(row.whatsapp) || row.email || row.id) === key) === index
+                }).map((item) => (
+                  <tr key={item.id}><td><Link to={`/app/klien/${item.id}`}>{item.name}</Link></td><td>{item.whatsapp}</td><td>{item.institution || '—'}</td><td>{item.studentStatus || '—'}</td></tr>
                 ))}
               </tbody>
             </table>
@@ -275,6 +280,7 @@ export function PeoplePage({ kind }: { kind: 'klien' | 'pekerja' }) {
 
 export function PaymentsPage() {
   const { state, act } = useAnara()
+  const [amount, setAmount] = useState(0)
   return (
     <Shell>
       <h1>Pembayaran</h1>
@@ -305,7 +311,8 @@ export function PaymentsPage() {
         const invoiceId = String(form.get('invoice'))
         const invoice = state.invoices.find((item) => item.id === invoiceId)
         if (!invoice) return
-        void act({ type: 'add-payment', orderId: invoice.orderId, invoiceId, amount: Number(form.get('jumlah')), proofName: String(form.get('bukti') || 'bukti') })
+        void act({ type: 'add-payment', orderId: invoice.orderId, invoiceId, amount, proofName: String(form.get('bukti') || 'bukti') })
+        setAmount(0)
       }}>
         <h3>Catat bukti transfer</h3>
         <label htmlFor="inv">Tagihan</label>
@@ -313,10 +320,10 @@ export function PaymentsPage() {
           {state.invoices.filter((item) => item.status !== 'lunas').map((item) => <option key={item.id} value={item.id}>{item.number} · {rupiah(item.amount)}</option>)}
         </select>
         <label htmlFor="jumlah">Nominal</label>
-        <input className="field" id="jumlah" name="jumlah" type="number" required />
+        <CurrencyInput id="jumlah" value={amount} onChange={setAmount} required />
         <label htmlFor="bukti">Nama berkas bukti</label>
         <input className="field" id="bukti" name="bukti" />
-        <button className="btn btn-grad" type="submit">Simpan bukti</button>
+        <ActionButton type="submit">Simpan bukti</ActionButton>
       </form>
     </Shell>
   )
@@ -326,6 +333,7 @@ export function FinancePage() {
   const { state, act } = useAnara()
   const money = moneySnapshot(state)
   const phase = state.settings.phase
+  const [expense, setExpense] = useState(0)
   return (
     <Shell>
       <h1>Keuangan</h1>
@@ -362,17 +370,18 @@ export function FinancePage() {
       <form className="card" style={{ marginTop: 16 }} onSubmit={(event) => {
         event.preventDefault()
         const form = new FormData(event.currentTarget)
-        void act({ type: 'add-expense', date: String(form.get('tanggal') || todayISO()), category: String(form.get('kategori')), amount: Number(form.get('jumlah')), memo: String(form.get('memo') || '') })
+        void act({ type: 'add-expense', date: String(form.get('tanggal') || todayISO()), category: String(form.get('kategori')), amount: expense, memo: String(form.get('memo') || '') })
+        setExpense(0)
       }}>
         <h3>Pengeluaran operasional</h3>
         <div className="form-row">
           <div><label htmlFor="kategori">Kategori</label><input className="field" id="kategori" name="kategori" required placeholder="Kuota, langganan, atau tools" /></div>
-          <div><label htmlFor="jumlah-keluar">Nominal</label><input className="field" id="jumlah-keluar" name="jumlah" type="number" required /></div>
+          <div><label htmlFor="jumlah-keluar">Nominal</label><CurrencyInput id="jumlah-keluar" value={expense} onChange={setExpense} required /></div>
         </div>
         <label htmlFor="memo">Catatan</label>
         <input className="field" id="memo" name="memo" />
         <input type="hidden" name="tanggal" value={todayISO()} />
-        <button className="btn btn-grad" type="submit">Catat pengeluaran</button>
+        <ActionButton type="submit">Catat pengeluaran</ActionButton>
         <p className="hint">Tools di atas kuota ditolak jika kas belum melewati {rupiah(state.settings.toolsThreshold)}.</p>
       </form>
     </Shell>
@@ -440,7 +449,7 @@ export function ContractPage() {
           <div className="card">
             <h3>Status</h3>
             <p>{contract ? `${contract.status}${contract.signerName ? ` · ${contract.signerName}` : ''}` : '—'}</p>
-            {contract?.otpHint && state.session?.role !== 'worker' ? <p>Kode untuk diteruskan lewat WhatsApp: {contract.otpHint}</p> : null}
+            {contract ? <p><a href={`/anara-app/setujui/${contract.id}`}>Pratinjau sisi klien</a></p> : null}
             {contract?.signedAt ? <p>Waktu {tanggal(contract.signedAt)} · IP {contract.ip || 'tidak tersedia'}</p> : null}
             {contract?.orderId ? <p><Link to={`/setujui/${contract.id}`}>Tautan persetujuan klien</Link></p> : null}
           </div>
@@ -768,20 +777,25 @@ export function SettingsPage() {
       </form>
       <div className="card" style={{ marginTop: 16 }}>
         <h3>Harga resmi</h3>
+        <p>Ubah nama, fitur, ikon, dan urutan di <Link to="/app/layanan">Kelola layanan</Link>. Pemilik dan manajer keuangan sama-sama dapat menyimpan.</p>
         {state.packages.map((item) => (
-          <form key={item.id} style={{ display: 'grid', gridTemplateColumns: '1.4fr .8fr .8fr auto', gap: 8, alignItems: 'center', marginBottom: 8 }} onSubmit={(event) => {
-            event.preventDefault()
-            const form = new FormData(event.currentTarget)
-            void act({ type: 'update-package', id: item.id, patch: { priceMin: Number(form.get('min')), priceMax: Number(form.get('max')), active: form.get('aktif') === 'on' } })
-          }}>
-            <span>{item.name}</span>
-            <input className="field" name="min" type="number" defaultValue={item.priceMin} aria-label={`Harga minimum ${item.name}`} disabled={!owner} style={{ margin: 0 }} />
-            <input className="field" name="max" type="number" defaultValue={item.priceMax} aria-label={`Harga maksimum ${item.name}`} disabled={!owner} style={{ margin: 0 }} />
-            <button className="btn btn-ghost btn-sm" type="submit" disabled={!owner}>Simpan</button>
-          </form>
+          <HargaResmi key={item.id} id={item.id} name={item.name} min={item.priceMin} max={item.priceMax} disabled={!owner} onSave={(priceMin, priceMax) => void act({ type: 'update-package', id: item.id, patch: { priceMin, priceMax } })} />
         ))}
       </div>
     </Shell>
+  )
+}
+
+function HargaResmi({ id, name, min, max, disabled, onSave }: { id: string; name: string; min: number; max: number; disabled: boolean; onSave: (min: number, max: number) => void }) {
+  const [low, setLow] = useState(min)
+  const [high, setHigh] = useState(max)
+  return (
+    <form style={{ display: 'grid', gridTemplateColumns: '1.4fr .8fr .8fr auto', gap: 8, alignItems: 'center', marginBottom: 8 }} onSubmit={(event) => { event.preventDefault(); onSave(low, high) }}>
+      <span>{name}</span>
+      <CurrencyInput id={`min-${id}`} value={low} onChange={setLow} />
+      <CurrencyInput id={`max-${id}`} value={high} onChange={setHigh} />
+      <ActionButton className="btn btn-ghost btn-sm" type="submit" disabled={disabled}>Simpan</ActionButton>
+    </form>
   )
 }
 

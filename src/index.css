@@ -26,7 +26,7 @@
 }
 html[data-theme="dark"]{
   --ink:#F6F4FF; --ivory:#101014; --paper:#18181E; --mist:#1E1C28;
-  --line:rgba(255,255,255,.08); --muted:#A39CB3; --muted2:#D5D0E0;
+  --line:rgba(255,255,255,.16); --muted:#D2CBE2; --muted2:#F3EEFF;
   --shadow:0 16px 50px rgba(0,0,0,.4);
   --side:#14141A; --side-text:#D5D0E0; --kpi-bg:#1C1C24;
 }
@@ -311,6 +311,51 @@ html[data-theme="dark"] .side .wm,html[data-theme="dark"] .brand .wm{filter:inve
 .install-banner > div{display:flex;gap:8px;align-items:center}
 .side .install-slot{padding:4px 4px 10px}
 .side .install-slot .btn{width:100%}
+
+.spin{width:14px;height:14px;border:2px solid color-mix(in srgb, currentColor 35%, transparent);border-top-color:currentColor;border-radius:50%;display:inline-block;flex:none}
+.skeleton{height:16px;border-radius:8px;background:linear-gradient(90deg,var(--mist),var(--paper),var(--mist));background-size:200% 100%}
+.dokumen{background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:28px;margin:24px auto 48px;box-shadow:var(--shadow-sm)}
+.dokumen .kop{display:flex;justify-content:space-between;align-items:flex-end;font-family:Sora,sans-serif}
+.dokumen .addr{color:var(--muted);font-size:13px;margin:8px 0 18px}
+.qr-row{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0}
+.qr-mark{margin:0;text-align:center;font-size:12px;color:var(--muted);max-width:180px}
+.qr-mark figcaption{display:flex;flex-direction:column;gap:2px;line-height:1.35}
+.qr-mark img{width:120px;height:120px;margin:0 auto 6px;background:#fff;padding:6px;border-radius:8px}
+.sign-pad{width:100%;max-width:520px;height:160px;background:#fff;border:1px dashed var(--violet);border-radius:16px;touch-action:none}
+.toast.ok{background:#0F9D76}
+.toast.bad{background:#9F1239}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .pkg,
+html[data-theme="dark"] .quote,
+html[data-theme="dark"] .step,
+html[data-theme="dark"] .ticket,
+html[data-theme="dark"] .field,
+html[data-theme="dark"] .chip,
+html[data-theme="dark"] .install-banner,
+html[data-theme="dark"] .install-hint,
+html[data-theme="dark"] .dokumen,
+html[data-theme="dark"] .tab{background:var(--paper);color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .btn-ghost,
+html[data-theme="dark"] .theme-btn,
+html[data-theme="dark"] .hamburger{color:var(--ink);background:transparent}
+html[data-theme="dark"] .btn-ink{background:#F7F7F5;color:#0A0A0B}
+html[data-theme="dark"] .nav{background:rgba(20,20,26,.82);color:var(--ink)}
+html[data-theme="dark"] table.data td,
+html[data-theme="dark"] table.data th{color:var(--ink);border-color:var(--line)}
+html[data-theme="dark"] .muted,
+html[data-theme="dark"] .sec-head p{color:var(--muted)}
+@media (prefers-reduced-motion: no-preference){
+  .spin{animation:spin .7s linear infinite}
+  .skeleton{animation:shimmer 1.2s linear infinite}
+  .btn:active{transform:translateY(1px) scale(.99)}
+  #isi{animation:rise .35s ease}
+}
+@media (prefers-reduced-motion: reduce){
+  .rise,.aurora span,.spin,.skeleton,#isi{animation:none !important}
+  .btn,.ticket{transition:none}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
 @media print{
   .nav,.side,.mob-nav,.pub-nav,.wa-float,.aurora,.no-print{display:none !important}

@@ -49,11 +49,12 @@ async function run(state: AppState, action: Action): Promise<ApplyResult> {
     case 'sign': {
       if (!action.agree) return { error: 'Centang persetujuan terlebih dahulu.' }
       if (action.name.trim().length < 3) return { error: 'Tuliskan nama terang.' }
+      if (action.signature.trim().length < 8) return { error: 'Bubuhkan tanda tangan.' }
       const { data, error } = await client.rpc('sign_contract', {
         p_contract_id: action.contractId,
         p_name: action.name.trim(),
-        p_otp: action.otp.trim(),
         p_agree: action.agree,
+        p_signature: action.signature,
         p_ip: action.ip,
         p_ua: action.userAgent,
       })
@@ -241,8 +242,48 @@ async function run(state: AppState, action: Action): Promise<ApplyResult> {
       if (fail) return { error: fail }
       return { info: 'Pengaturan disimpan.' }
     }
+    case 'save-package': {
+      const denied = deny(state, ['owner', 'finance'])
+      if (denied) return { error: denied }
+      if (!action.name.trim() || action.priceMin <= 0) return { error: 'Nama dan harga wajib diisi.' }
+      const row = {
+        id: action.id || action.slug,
+        slug: action.slug,
+        brand: action.brand,
+        name: action.name.trim(),
+        summary: action.summary,
+        features: action.features,
+        price_min: action.priceMin,
+        price_max: Math.max(action.priceMax, action.priceMin),
+        fixed: action.priceMin === action.priceMax,
+        lead_days: action.leadDays || 7,
+        icon: action.icon,
+        active: action.active,
+        revisions: 2,
+        sort: action.id ? state.packages.find((item) => item.id === action.id)?.sort ?? 0 : state.packages.length + 1,
+      }
+      const saved = action.id
+        ? await client.from('packages').update(row).eq('id', action.id)
+        : await client.from('packages').insert(row)
+      const fail = pesan(saved.error)
+      if (fail) return { error: fail }
+      return { info: 'Layanan disimpan. Katalog langsung memakai data ini.' }
+    }
+    case 'move-package': {
+      const denied = deny(state, ['owner', 'finance'])
+      if (denied) return { error: denied }
+      const list = [...state.packages].sort((a, b) => a.sort - b.sort)
+      const index = list.findIndex((item) => item.id === action.id)
+      const swap = action.direction === 'naik' ? index - 1 : index + 1
+      if (index < 0 || swap < 0 || swap >= list.length) return {}
+      const current = list[index]
+      const other = list[swap]
+      await client.from('packages').update({ sort: other.sort }).eq('id', current.id)
+      await client.from('packages').update({ sort: current.sort }).eq('id', other.id)
+      return { info: 'Urutan layanan diperbarui.' }
+    }
     case 'update-package': {
-      const denied = deny(state, ['owner'])
+      const denied = deny(state, ['owner', 'finance'])
       if (denied) return { error: denied }
       const updated = await client.from('packages').update({
         price_min: action.patch.priceMin,

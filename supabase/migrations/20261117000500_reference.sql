@@ -23,13 +23,14 @@ on conflict (id) do update set name = excluded.name, summary = excluded.summary,
 
 insert into public.contract_templates (key, name, prefix, body) values
 ('pks','01 Perjanjian Kerja Sama Mitra','ANR/PKS',$body_pks$01 Perjanjian Kerja Sama Mitra
-Nomor: {{nomor}}n (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Nomor: {{nomor}}
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 PERJANJIAN KERJA SAMA MITRA
 ANARA
 Perjanjian ini dibuat dan disepakati oleh dua pihak di bawah ini, dalam bahasa yang jelas agar hak, kewajiban, dan pembagian hasil usaha ANARA dapat dijalankan dengan tertib.
 Pada tanggal {{tanggal}} , yang menandatangani perjanjian ini:
 1. M. Wilda Alfiansyah, A.Md.Kes.
-selaku Pemilik ANARA, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699, selanjutnya disebut Pihak Pertama.
+selaku Pemilik ANARA, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699, selanjutnya disebut Pihak Pertama.
 2. M. Fadilah Alkadri
 selaku Mitra Pengelola ANARA, Manager Keuangan dan Admin WhatsApp, beralamat di {{alamat_mitra}}, WhatsApp {{wa_mitra}} , selanjutnya disebut Pihak Kedua.
 Pihak Pertama dan Pihak Kedua, baik sendiri-sendiri maupun bersama-sama, selanjutnya disebut Para Pihak. Para Pihak menyatakan cakap dan berwenang menandatangani perjanjian ini, lalu sepakat terikat pada ketentuan berikut.
@@ -41,7 +42,7 @@ Pasal 1 Pengertian
 (5) Rencana Bisnis ANARA 2027 dan SOP ANARA (SOP-ANARA-001 sampai SOP-ANARA-011) merupakan bagian yang tidak terpisahkan dari perjanjian ini, sepanjang tidak bertentangan dengan pasal di sini.
 Pasal 2 Ruang lingkup dan peran (1) Perjanjian ini mengatur kerja sama Para Pihak dalam menjalankan ANARA, termasuk pengerjaan order, pengelolaan uang, pembagian hasil, dan tata tertib kerja.
 (2) Pihak Pertama sebagai pemilik menentukan arah usaha, mutu layanan, harga resmi, dan skema bagi hasil. Pihak Pertama mengerjakan order ANARA Studio dan ANARA Tech, serta merancang aplikasi order dan keuangan milik ANARA. Pihak Pertama tidak memegang kas harian.
-(3) Pihak Kedua memegang kas usaha, mencatat keuangan, menjadi Admin WhatsApp resmi 0581-1699-699, dan mengerjakan order ANARA Edukasi. Pihak Kedua tidak mengubah skema bagi hasil, daftar harga resmi, atau rekening usaha tanpa persetujuan tertulis Pihak Pertama.
+(3) Pihak Kedua memegang kas usaha, mencatat keuangan, menjadi Admin WhatsApp resmi 0858-1169-9699, dan mengerjakan order ANARA Edukasi. Pihak Kedua tidak mengubah skema bagi hasil, daftar harga resmi, atau rekening usaha tanpa persetujuan tertulis Pihak Pertama.
 (4) Pembagian peran pengerjaan di atas adalah patokan kerja. Jika suatu order dikerjakan bersama atau dialihkan karena salah satu pihak berhalangan, jasa pengerja dibayar kepada yang benar-benar mengerjakan, dan dicatat secara tertulis.
 Pasal 3 Kewajiban dan hak Pihak Pertama berkewajiban:
 - Menjaga arah, mutu, dan nama baik ANARA.
@@ -51,7 +52,7 @@ Pasal 3 Kewajiban dan hak Pihak Pertama berkewajiban:
 - Menerima bagian laba bersih sesuai Pasal 4.
 - Memeriksa catatan kas, rekening usaha, dan arsip order setiap saat.
 - Menolak order yang merugikan nama baik atau berada di luar lingkup layanan ANARA. Pihak Kedua berkewajiban:
-- Membalas pesan masuk di WhatsApp 0581-1699-699 pada hari kerja yang sama, paling lambat 24 jam.
+- Membalas pesan masuk di WhatsApp 0858-1169-9699 pada hari kerja yang sama, paling lambat 24 jam.
 - Mencatat setiap penerimaan dan pengeluaran pada hari yang sama, serta menjaga rekening usaha terpisah dari rekening pribadi.
 - Mengerjakan order Edukasi sebagai pendampingan, bimbingan, dan penyuntingan, sesuai SOP dan etika akademik.
 - Menyusun laporan tertulis paling lambat setiap tanggal 5 bulan berikutnya.
@@ -110,16 +111,17 @@ PIHAK KEDUA
 Mitra Pengelola ANARA
 tempat materai
 M. Fadilah Alkadri
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699 (wa.me/625811699699).$body_pks$),
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699 (wa.me/6285811699699).$body_pks$),
 ('pekerja','02 Kontrak Pekerja dan Admin Medsos','ANR/PKP',$body_pekerja$02 Kontrak Kerja Pekerja dan Admin Medsos
-Nomor: {{nomor}}n (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Nomor: {{nomor}}
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 PERJANJIAN KERJA SAMA
 Pekerja Lepas / Freelancer dan Admin Media Sosial
 Bagian yang diarsir kuning dan titik-titik adalah isian. Ganti dengan data yang benar sebelum dicetak dan ditandatangani.
 Templat ini dipakai ANARA ketika menambah pekerja lepas, honorer, atau admin media sosial. Lowongan hanya dibuka jika syarat di Rencana Bisnis dan SOP-ANARA-011 sudah terpenuhi, yaitu omzet minimal Rp12.000.000 selama tiga bulan beruntun dan kas usaha minimal Rp15.000.000, kecuali ada keputusan tertulis lain dari Pemilik.
 Pada tanggal {{tanggal}} , yang menandatangani perjanjian ini:
 1. M. Wilda Alfiansyah, A.Md.Kes.
-selaku Pemilik ANARA, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699, selanjutnya disebut ANARA.
+selaku Pemilik ANARA, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699, selanjutnya disebut ANARA.
 2. Data pekerja
 Uraian Isian
 Nama lengkap | {{nama_pekerja}}
@@ -164,9 +166,10 @@ PEKERJA
 Nama terang
 tempat materai
 {{nama_pekerja}}
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699 (wa.me/625811699699).$body_pekerja$),
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699 (wa.me/6285811699699).$body_pekerja$),
 ('umum','03 Kontrak Layanan Klien Umum','ANR/UMM',$body_umum$03 Kontrak Layanan Klien Umum
-Nomor: {{nomor}}n (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Nomor: {{nomor}}
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 PERJANJIAN LAYANAN
 Templat umum untuk klien ANARA
 Bagian yang diarsir kuning dan titik-titik adalah isian. Ganti dengan data yang benar sebelum dicetak dan ditandatangani.
@@ -187,7 +190,7 @@ Pelunasan | {{sisa}}
 Tanggal mulai | {{mulai}}
 Tanggal selesai (target) | {{selesai}}
 Jumlah putaran revisi yang termasuk | {{revisi}}
-Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
+Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
 Pasal 1 Dasar kesepakatan (1) ANARA menyediakan layanan sesuai unit, paket, dan uraian yang tertulis pada tabel di atas, serta lampiran jika ada. Jika ada perbedaan antara pembicaraan lisan dan tulisan, yang berlaku adalah yang tertulis dalam perjanjian ini dan lampirannya.
 (2) Pekerjaan dimulai setelah uang muka diterima dan brief atau bahan awal yang diminta ANARA sudah lengkap. File atau hasil akhir diserahkan setelah pelunasan.
 Pasal 2 Biaya dan pembayaran (1) Harga total adalah jumlah yang tertulis pada tabel. Harga itu sudah mencakup putaran revisi yang disebutkan, sepanjang masih dalam lingkup pekerjaan.
@@ -233,9 +236,10 @@ KLIEN
 Nama terang
 tempat materai
 {{nama_klien}}
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699 (wa.me/625811699699).$body_umum$),
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699 (wa.me/6285811699699).$body_umum$),
 ('studio','04 Kontrak Klien Studio','ANR/STD',$body_studio$04 Kontrak Klien Studio
-Nomor: {{nomor}}n (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Nomor: {{nomor}}
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 PERJANJIAN LAYANAN
 ANARA Studio · Video, audio, video AI, dan undangan digital
 Bagian yang diarsir kuning dan titik-titik adalah isian. Ganti dengan data yang benar sebelum dicetak dan ditandatangani.
@@ -256,7 +260,7 @@ Pelunasan | {{sisa}}
 Tanggal mulai | {{mulai}}
 Tanggal selesai (target) | {{selesai}}
 Jumlah putaran revisi yang termasuk | {{revisi}}
-Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
+Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
 Pasal 1 Dasar kesepakatan (1) ANARA menyediakan layanan sesuai unit, paket, dan uraian yang tertulis pada tabel di atas, serta lampiran jika ada. Jika ada perbedaan antara pembicaraan lisan dan tulisan, yang berlaku adalah yang tertulis dalam perjanjian ini dan lampirannya.
 (2) Pekerjaan dimulai setelah uang muka diterima dan brief atau bahan awal yang diminta ANARA sudah lengkap. File atau hasil akhir diserahkan setelah pelunasan.
 Pasal 2 Biaya dan pembayaran (1) Harga total adalah jumlah yang tertulis pada tabel. Harga itu sudah mencakup putaran revisi yang disebutkan, sepanjang masih dalam lingkup pekerjaan.
@@ -304,9 +308,10 @@ KLIEN
 Nama terang
 tempat materai
 {{nama_klien}}
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699 (wa.me/625811699699).$body_studio$),
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699 (wa.me/6285811699699).$body_studio$),
 ('tech','05 Kontrak Klien Tech','ANR/TCH',$body_tech$05 Kontrak Klien Tech
-Nomor: {{nomor}}n (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Nomor: {{nomor}}
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 PERJANJIAN LAYANAN
 ANARA Tech · Situs, aplikasi, dan flipbook
 Bagian yang diarsir kuning dan titik-titik adalah isian. Ganti dengan data yang benar sebelum dicetak dan ditandatangani.
@@ -327,7 +332,7 @@ Pelunasan | {{sisa}}
 Tanggal mulai | {{mulai}}
 Tanggal selesai (target) | {{selesai}}
 Jumlah putaran revisi yang termasuk | {{revisi}}
-Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
+Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
 Pasal 1 Dasar kesepakatan (1) ANARA menyediakan layanan sesuai unit, paket, dan uraian yang tertulis pada tabel di atas, serta lampiran jika ada. Jika ada perbedaan antara pembicaraan lisan dan tulisan, yang berlaku adalah yang tertulis dalam perjanjian ini dan lampirannya.
 (2) Pekerjaan dimulai setelah uang muka diterima dan brief atau bahan awal yang diminta ANARA sudah lengkap. File atau hasil akhir diserahkan setelah pelunasan.
 Pasal 2 Biaya dan pembayaran (1) Harga total adalah jumlah yang tertulis pada tabel. Harga itu sudah mencakup putaran revisi yang disebutkan, sepanjang masih dalam lingkup pekerjaan.
@@ -378,9 +383,10 @@ KLIEN
 Nama terang
 tempat materai
 {{nama_klien}}
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699 (wa.me/625811699699).$body_tech$),
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699 (wa.me/6285811699699).$body_tech$),
 ('edukasi','06 Kontrak Klien Edukasi','ANR/EDU',$body_edukasi$06 Kontrak Klien Edukasi
-Nomor: {{nomor}}n (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Nomor: {{nomor}}
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 PERJANJIAN LAYANAN
 ANARA Edukasi · Pendampingan mahasiswa reguler dan mahasiswa RPL
 Bagian yang diarsir kuning dan titik-titik adalah isian. Ganti dengan data yang benar sebelum dicetak dan ditandatangani.
@@ -401,7 +407,7 @@ Pelunasan | {{sisa}}
 Tanggal mulai | {{mulai}}
 Tanggal selesai (target) | {{selesai}}
 Jumlah putaran revisi yang termasuk | {{revisi}}
-Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
+Rekening pembayaran | {{rekening}} ANARA dalam perjanjian ini diwakili oleh M. Wilda Alfiansyah, A.Md.Kes., Pemilik, berkedudukan di Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699. Pihak yang datanya tertulis pada tabel di atas selanjutnya disebut Klien.
 Pasal 1 Dasar kesepakatan (1) ANARA menyediakan layanan sesuai unit, paket, dan uraian yang tertulis pada tabel di atas, serta lampiran jika ada. Jika ada perbedaan antara pembicaraan lisan dan tulisan, yang berlaku adalah yang tertulis dalam perjanjian ini dan lampirannya.
 (2) Pekerjaan dimulai setelah uang muka diterima dan brief atau bahan awal yang diminta ANARA sudah lengkap. File atau hasil akhir diserahkan setelah pelunasan.
 Pasal 2 Biaya dan pembayaran (1) Harga total adalah jumlah yang tertulis pada tabel. Harga itu sudah mencakup putaran revisi yang disebutkan, sepanjang masih dalam lingkup pekerjaan.
@@ -453,15 +459,15 @@ KLIEN
 Nama terang
 tempat materai
 {{nama_klien}}
-Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0581-1699-699 (wa.me/625811699699).$body_edukasi$),
+Alamat usaha: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat. WhatsApp 0858-1169-9699 (wa.me/6285811699699).$body_edukasi$),
 ('snk','07 Syarat dan Ketentuan Layanan','',$body_snk$07 Syarat dan Ketentuan Layanan
 Berlaku untuk setiap order
-Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0581-1699-699
+Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat · WhatsApp 0858-1169-9699
 SYARAT DAN KETENTUAN LAYANAN ANARA
 Ringkasan untuk percakapan WhatsApp dan halaman web
 Ringkasan ini berlaku untuk setiap order ANARA. Jika Klien dan ANARA menandatangani perjanjian tertulis, bunyi perjanjian itu yang diutamakan apabila ada perbedaan.
 1. Layanan. ANARA menyediakan jasa ANARA Studio (video, audio, video AI, undangan digital), ANARA Edukasi (pendampingan naskah mahasiswa reguler dan mahasiswa RPL), dan ANARA Tech (situs profil, aplikasi kerja, aplikasi Android, flipbook). Rincian mengikuti penawaran atau perjanjian yang disepakati. 2. Harga dan pembayaran. Harga mengikuti penawaran tertulis. Uang muka standar 50 persen, kecuali disepakati lain. Pekerjaan dimulai setelah uang muka masuk. Hasil akhir diserahkan setelah pelunasan ke rekening yang tercantum pada tagihan. 3. Jadwal. Jadwal berjalan jika bahan dan masukan Klien lengkap. Keterlambatan bahan dapat menggeser tenggat. 4. Revisi. Dua putaran revisi termasuk dalam harga, sepanjang masih dalam lingkup. Perubahan konsep, tambahan pokok, atau revisi berlebih dikenai biaya yang diberitahukan lebih dulu. 5. Bahan dari Klien. Klien menjamin berhak memakai semua bahan yang dikirim kepada ANARA, dan bertanggung jawab jika bahan itu menimbulkan tuntutan pihak lain. 6. Hak cipta dan portofolio. Setelah lunas, Klien berhak memakai hasil sesuai tujuan order. ANARA boleh menampilkan karya sebagai portofolio, kecuali Klien meminta secara tertulis agar tidak dipamerkan. Untuk naskah akademik, ANARA tidak menampilkannya tanpa izin tertulis Klien.
-7. Kerahasiaan. ANARA menjaga data dan bahan Klien, dan tidak membagikannya kepada pihak lain tanpa izin, kecuali diwajibkan hukum. 8. Pendampingan edukasi. Layanan Edukasi adalah pendampingan, bimbingan, dan penyuntingan. Klien bertanggung jawab atas keaslian, sitasi, dan pemakaian naskahnya. ANARA tidak menjamin kelulusan dan berhak menolak permintaan yang melewati batas itu. 9. Pembatalan. Jika Klien membatalkan sebelum pekerjaan dimulai, uang muka dikembalikan setelah dipotong biaya administrasi 10 persen. Jika pekerjaan sudah dimulai, uang muka tidak dikembalikan. Jika ANARA membatalkan bukan karena kesalahan Klien, pembayaran yang sudah diterima untuk pekerjaan itu dikembalikan. 10. Keterlambatan dan keadaan kahar. Keterlambatan karena bahan atau pembayaran Klien tidak menjadi kesalahan ANARA. Keadaan kahar yang menghalangi kerja diberitahukan secepatnya dan menunda kewajiban selama keadaan itu berlangsung. 11. Garansi. Kesalahan teknis pada hasil yang diserahkan dapat dilaporkan dalam tujuh hari kerja. Untuk layanan Tech, perbaikan bug pada lingkup yang disepakati berlaku 30 hari setelah serah terima. Fitur baru, pemeliharaan, domain, dan hosting bukan bagian garansi, kecuali dibeli terpisah. 12. Penyelesaian masalah. Masalah diselesaikan melalui musyawarah. Jika tidak selesai, tempuh Pengadilan Negeri Sintang. Kontak resmi ANARA: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0581-1699-699 (wa.me/625811699699).
+7. Kerahasiaan. ANARA menjaga data dan bahan Klien, dan tidak membagikannya kepada pihak lain tanpa izin, kecuali diwajibkan hukum. 8. Pendampingan edukasi. Layanan Edukasi adalah pendampingan, bimbingan, dan penyuntingan. Klien bertanggung jawab atas keaslian, sitasi, dan pemakaian naskahnya. ANARA tidak menjamin kelulusan dan berhak menolak permintaan yang melewati batas itu. 9. Pembatalan. Jika Klien membatalkan sebelum pekerjaan dimulai, uang muka dikembalikan setelah dipotong biaya administrasi 10 persen. Jika pekerjaan sudah dimulai, uang muka tidak dikembalikan. Jika ANARA membatalkan bukan karena kesalahan Klien, pembayaran yang sudah diterima untuk pekerjaan itu dikembalikan. 10. Keterlambatan dan keadaan kahar. Keterlambatan karena bahan atau pembayaran Klien tidak menjadi kesalahan ANARA. Keadaan kahar yang menghalangi kerja diberitahukan secepatnya dan menunda kewajiban selama keadaan itu berlangsung. 11. Garansi. Kesalahan teknis pada hasil yang diserahkan dapat dilaporkan dalam tujuh hari kerja. Untuk layanan Tech, perbaikan bug pada lingkup yang disepakati berlaku 30 hari setelah serah terima. Fitur baru, pemeliharaan, domain, dan hosting bukan bagian garansi, kecuali dibeli terpisah. 12. Penyelesaian masalah. Masalah diselesaikan melalui musyawarah. Jika tidak selesai, tempuh Pengadilan Negeri Sintang. Kontak resmi ANARA: Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat, WhatsApp 0858-1169-9699 (wa.me/6285811699699).
 ANARA, Beyond Value. Sintang, Kalimantan Barat. Dokumen ini dapat dikirim apa adanya lewat WhatsApp atau dipasang di situs. Untuk order yang lebih besar, gunakan perjanjian layanan yang ditandatangani.$body_snk$)
 on conflict (key) do nothing;
 
@@ -478,9 +484,9 @@ insert into public.automation_rules (key, title, detail, message, enabled, group
 ('cadangan','Cadangan mingguan','Ringkasan tiap Senin.','Cadangan siap.',true,'laporan')
 on conflict (key) do nothing;
 
-insert into public.app_settings (id, payload) values (1, $set${"phase": 3, "phaseAuto": true, "splits": {"1": [40, 30, 15, 15], "2": [45, 15, 15, 25], "3": [50, 10, 15, 25]}, "bankName": "", "bankNumber": "", "bankHolder": "", "emergencyRate": 0.2, "emergencyCap": 5000000, "toolsThreshold": 2000000, "recruitRevenue": 12000000, "recruitMonths": 3, "recruitCash": 15000000, "ownerShare": 60, "partnerShare": 40, "honor": {"1": 300000, "2": 500000, "3": 750000}, "waDisplay": "0581-1699-699", "waLink": "https://wa.me/625811699699", "address": "Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat", "ownerName": "M. Wilda Alfiansyah, A.Md.Kes.", "partnerName": "M. Fadilah Alkadri"}$set$) on conflict (id) do nothing;
+insert into public.app_settings (id, payload) values (1, $set${"phase": 3, "phaseAuto": true, "splits": {"1": [40, 30, 15, 15], "2": [45, 15, 15, 25], "3": [50, 10, 15, 25]}, "bankName": "", "bankNumber": "", "bankHolder": "", "emergencyRate": 0.2, "emergencyCap": 5000000, "toolsThreshold": 2000000, "recruitRevenue": 12000000, "recruitMonths": 3, "recruitCash": 15000000, "ownerShare": 60, "partnerShare": 40, "honor": {"1": 300000, "2": 500000, "3": 750000}, "waDisplay": "0858-1169-9699", "waLink": "https://wa.me/6285811699699", "address": "Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat", "ownerName": "M. Wilda Alfiansyah, A.Md.Kes.", "partnerName": "M. Fadilah Alkadri"}$set$) on conflict (id) do nothing;
 
 insert into public.workers (id, name, whatsapp, title, brand, active, sample) values
-('11111111-1111-4111-8111-111111111111','M. Wilda Alfiansyah, A.Md.Kes.','05811699699','Pemilik · Studio dan Tech','semua',true,false),
-('22222222-2222-4222-8222-222222222222','M. Fadilah Alkadri','05811699699','Keuangan · Admin WA · Edukasi','edukasi',true,false)
+('11111111-1111-4111-8111-111111111111','M. Wilda Alfiansyah, A.Md.Kes.','085811699699','Pemilik · Studio dan Tech','semua',true,false),
+('22222222-2222-4222-8222-222222222222','M. Fadilah Alkadri','085811699699','Keuangan · Admin WA · Edukasi','edukasi',true,false)
 on conflict (id) do nothing;

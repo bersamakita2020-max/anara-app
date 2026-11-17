@@ -17,7 +17,9 @@ export type Action =
   | { type: 'add-payment'; orderId: string; invoiceId: string; amount: number; proofName: string }
   | { type: 'verify-payment'; paymentId: string; accept: boolean }
   | { type: 'add-expense'; date: string; category: string; amount: number; memo: string }
-  | { type: 'sign'; contractId: string; name: string; otp: string; agree: boolean; ip: string; userAgent: string }
+  | { type: 'sign'; contractId: string; name: string; agree: boolean; signature: string; ip: string; userAgent: string }
+  | { type: 'save-package'; id?: string; slug: string; brand: 'studio' | 'edukasi' | 'tech'; name: string; summary: string; features: string; priceMin: number; priceMax: number; leadDays: number; icon: string; active: boolean }
+  | { type: 'move-package'; id: string; direction: 'naik' | 'turun' }
   | { type: 'generate-contract'; orderId: string | null; templateKey: string }
   | { type: 'update-template'; key: string; body: string }
   | { type: 'set-contract-status'; id: string; status: 'draf' | 'terkirim' | 'disetujui' }

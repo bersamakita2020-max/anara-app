@@ -6,7 +6,7 @@ import { InstallBanner, InstallButton } from './install'
 import { useAnara } from '../data/store'
 import type { Role } from '../types'
 
-const WA = 'https://wa.me/625811699699'
+const WA = 'https://wa.me/6285811699699'
 
 export function Aurora() {
   return (
@@ -23,8 +23,8 @@ export function Flash() {
   const { flash, clearFlash } = useAnara()
   if (!flash) return null
   return (
-    <button className="toast" type="button" onClick={clearFlash}>
-      {flash}
+    <button className={flash.ok ? 'toast ok' : 'toast bad'} type="button" onClick={clearFlash}>
+      {flash.text}
     </button>
   )
 }
@@ -67,7 +67,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <img src={wordmark} alt="anara" style={{ height: 26, width: 'auto' }} />
             <div className="gold" style={{ marginTop: 12 }}>ANARA, Beyond Value</div>
             <p style={{ marginTop: 12 }}>Jl. AIPDA KS. Tubun (depan Gereja Immanuel), Sintang, Kalimantan Barat</p>
-            <p>WhatsApp 0581-1699-699</p>
+            <p>WhatsApp 0858-1169-9699</p>
           </div>
           <div>
             <h4>Unit</h4>
@@ -100,6 +100,7 @@ const LINKS: { to: string; label: string; icon: string; roles: Role[] }[] = [
   { to: '/app', label: 'Ringkasan', icon: '✦', roles: ['owner', 'finance', 'worker', 'social'] },
   { to: '/app/order', label: 'Papan order', icon: '☰', roles: ['owner', 'finance', 'worker'] },
   { to: '/app/klien', label: 'Klien', icon: '☺', roles: ['owner', 'finance'] },
+  { to: '/app/layanan', label: 'Layanan', icon: '◎', roles: ['owner', 'finance'] },
   { to: '/app/pekerja', label: 'Pekerja', icon: '✎', roles: ['owner', 'finance'] },
   { to: '/app/pembayaran', label: 'Pembayaran', icon: 'Rp', roles: ['owner', 'finance'] },
   { to: '/app/keuangan', label: 'Keuangan', icon: '◈', roles: ['owner', 'finance'] },
@@ -113,7 +114,7 @@ const LINKS: { to: string; label: string; icon: string; roles: Role[] }[] = [
 ]
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { state, loadError, act } = useAnara()
+  const { state, loadError, act, prefetch } = useAnara()
   const navigate = useNavigate()
   const role = state.session?.role
   if (!state.session || role === 'client') {
@@ -138,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NavLink to="/app"><img className="wm" src={wordmark} alt="anara" /></NavLink>
           <nav aria-label="Dasbor">
             {links.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.to === '/app'} className={({ isActive }) => (isActive ? 'on' : undefined)}>
+              <NavLink key={item.to} to={item.to} end={item.to === '/app'} className={({ isActive }) => (isActive ? 'on' : undefined)} onMouseEnter={prefetch} onFocus={prefetch}>
                 <span aria-hidden="true">{item.icon}</span>
                 {item.label}
               </NavLink>
@@ -202,8 +203,10 @@ export function ThemeButton() {
 
 export function Loading() {
   return (
-    <div className="wrap page-head">
-      <p>Memuat ANARA…</p>
+    <div className="wrap page-head" aria-busy="true">
+      <div className="skeleton" />
+      <div className="skeleton" style={{ width: '70%', marginTop: 12 }} />
+      <div className="skeleton" style={{ width: '40%', marginTop: 12 }} />
     </div>
   )
 }
