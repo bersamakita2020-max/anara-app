@@ -32,6 +32,7 @@ const AutomationPage = lazy(() => import('./pages/internal').then((mod) => ({ de
 const PortfolioAdminPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.PortfolioAdminPage })))
 const SettingsPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.SettingsPage })))
 const AuditPage = lazy(() => import('./pages/internal').then((mod) => ({ default: mod.AuditPage })))
+const OpsiPage = lazy(() => import('./pages/opsi').then((mod) => ({ default: mod.OpsiPage })))
 
 const queryClient = new QueryClient()
 
@@ -76,6 +77,7 @@ export default function App() {
               <Route path="/app/automasi" element={<AutomationPage />} />
               <Route path="/app/portofolio" element={<PortfolioAdminPage />} />
               <Route path="/app/pengaturan" element={<SettingsPage />} />
+              <Route path="/app/opsi" element={<OpsiPage />} />
               <Route path="/app/audit" element={<AuditPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -92,7 +92,7 @@ export function WhatsappPage() {
         </Field>
         <ActionButton type="submit">Tes kirim</ActionButton>
       </form>
-      <div style={{ marginTop: 16 }}>
+      <div id="log" style={{ marginTop: 16 }}>
         <DataTable
           rows={state.waLog}
           empty="Belum ada log. Log terisi setelah fungsi wa-gateway berjalan."

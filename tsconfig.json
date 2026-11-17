@@ -19,5 +19,5 @@
     "paths": { "@/*": ["src/*"] }
   },
   "include": ["src"],
-  "exclude": ["src/lib/finance.test.ts"]
+  "exclude": ["src/lib/finance.test.ts", "src/sw.ts"]
 }
