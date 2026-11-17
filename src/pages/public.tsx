@@ -309,11 +309,13 @@ export function SignPage() {
   const [seals, setSeals] = useState<{ token: string; signerName: string; signerTitle: string }[]>([])
   const [loading, setLoading] = useState(!local)
   useEffect(() => {
-    if (!id || local) return
+    if (!id) return
     let active = true
-    void callRpc<{ id: string; orderId: string | null; number: string; title: string; body: string; status: 'draf' | 'terkirim' | 'disetujui'; signerName: string; signedAt: string | null } | null>('get_public_contract', { p_id: id })
+    void callRpc<{ id: string; orderId: string | null; number: string; title: string; body: string; status: 'draf' | 'terkirim' | 'disetujui'; signerName: string; signedAt: string | null; seals?: { token: string; signerName: string; signerTitle: string }[] } | null>('get_public_contract', { p_id: id })
       .then((data) => {
         if (!active || !data) return
+        if (data.seals) setSeals(data.seals)
+        if (local) return
         setRemote({
           id: data.id,
           orderId: data.orderId,
@@ -330,8 +332,6 @@ export function SignPage() {
           attempts: 0,
           sample: false,
         })
-        const extra = data as { seals?: { token: string; signerName: string; signerTitle: string }[] }
-        if (extra.seals) setSeals(extra.seals)
       })
       .catch(() => undefined)
       .finally(() => { if (active) setLoading(false) })
