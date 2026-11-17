@@ -30,8 +30,11 @@ export function Flash() {
 }
 
 export function PublicShell({ children }: { children: ReactNode }) {
-  const { loadError } = useAnara()
+  const { loadError, state } = useAnara()
   const [open, setOpen] = useState(false)
+  const tim = Boolean(state.session && state.session.role !== 'client')
+  const akunTo = tim ? '/app' : '/masuk'
+  const akunLabel = tim ? 'Dasbor' : 'Masuk tim'
   return (
     <>
       <a className="skip" href="#isi">Loncat ke isi</a>
@@ -47,9 +50,10 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <a href="#harga">Harga</a>
             <a href="#karya">Karya</a>
             <NavLink to="/lacak">Lacak pesanan</NavLink>
+            <NavLink to={akunTo} onClick={() => setOpen(false)}>{akunLabel}</NavLink>
           </nav>
           <div className="nav-cta">
-            <NavLink className="btn btn-ghost btn-sm" to="/masuk">Masuk tim</NavLink>
+            <NavLink className="btn btn-grad btn-sm btn-masuk" to={akunTo}>{tim ? 'Dasbor' : 'Masuk'}</NavLink>
             <InstallButton />
             <a className="btn btn-grad btn-sm" href={WA} target="_blank" rel="noreferrer">WhatsApp</a>
             <button className="hamburger" type="button" aria-label="Menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
@@ -79,6 +83,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <h4>Pesan</h4>
             <NavLink to="/pesan">Formulir pesanan</NavLink>
             <NavLink to="/lacak">Lacak pesanan</NavLink>
+            <NavLink to={akunTo}>{akunLabel}</NavLink>
             <a href={WA}>Chat WhatsApp</a>
           </div>
         </div>
@@ -90,6 +95,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
         <a href="#harga"><span>◎</span>Layanan</a>
         <NavLink to="/pesan"><span>＋</span>Pesan</NavLink>
         <NavLink to="/lacak"><span>◷</span>Lacak</NavLink>
+        <NavLink to={akunTo}><span>{tim ? '▣' : '☺'}</span>{tim ? 'Dasbor' : 'Masuk'}</NavLink>
       </nav>
       <Flash />
     </>
@@ -254,7 +260,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
   const groups = GROUPS.map((group) => ({ ...group, items: group.items.filter((item) => terlihat(item, peran)) })).filter((group) => group.items.length > 0)
   const unread = state.notices.filter((item) => !item.read && (item.forRole === 'semua' || item.forRole === role)).length
-  const crumb = CRUMB[location.pathname] || 'Dasbor'
+  const crumb = CRUMB[location.pathname] || (location.pathname.startsWith('/app/order/') ? 'Order' : location.pathname.startsWith('/app/klien/') ? 'Klien' : 'Dasbor')
   return (
     <div className={`app ${sheet ? 'menu-open' : ''} ${collapsed ? 'side-collapsed' : ''}`}>
       <a className="skip" href="#isi">Loncat ke isi</a>
