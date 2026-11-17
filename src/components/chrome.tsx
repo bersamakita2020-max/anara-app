@@ -96,36 +96,133 @@ export function PublicShell({ children }: { children: ReactNode }) {
   )
 }
 
-const LINKS: { to: string; label: string; icon: string; roles: Role[] }[] = [
-  { to: '/app', label: 'Ringkasan', icon: '✦', roles: ['owner', 'finance', 'worker', 'social'] },
-  { to: '/app/order', label: 'Order', icon: '☰', roles: ['owner', 'finance', 'worker'] },
-  { to: '/app/klien', label: 'Klien', icon: '☺', roles: ['owner', 'finance'] },
-  { to: '/app/layanan', label: 'Layanan', icon: '◎', roles: ['owner', 'finance'] },
-  { to: '/app/tagihan', label: 'Tagihan', icon: 'Rp', roles: ['owner', 'finance'] },
-  { to: '/app/kontrak', label: 'Kontrak', icon: '⌘', roles: ['owner', 'finance'] },
-  { to: '/app/slip', label: 'Slip gaji', icon: '✎', roles: ['owner', 'finance'] },
-  { to: '/app/pembayaran', label: 'Kas masuk', icon: '↓', roles: ['owner', 'finance'] },
-  { to: '/app/keuangan', label: 'Keuangan', icon: '◈', roles: ['owner', 'finance'] },
-  { to: '/app/bayar', label: 'QRIS & gateway', icon: '▣', roles: ['owner', 'finance'] },
-  { to: '/app/whatsapp', label: 'WhatsApp', icon: '💬', roles: ['owner', 'finance'] },
-  { to: '/app/pekerja', label: 'Pekerja', icon: '☺', roles: ['owner', 'finance'] },
-  { to: '/app/monitoring', label: 'Monitoring', icon: '◉', roles: ['owner', 'finance', 'worker'] },
-  { to: '/app/laporan', label: 'Laporan', icon: '▤', roles: ['owner', 'finance'] },
-  { to: '/app/automasi', label: 'Automasi', icon: '⚡', roles: ['owner', 'finance'] },
-  { to: '/app/portofolio', label: 'Portofolio', icon: '▣', roles: ['owner', 'social'] },
-  { to: '/app/pengaturan', label: 'Pengaturan', icon: '⚙', roles: ['owner', 'finance'] },
-  { to: '/app/audit', label: 'Jejak audit', icon: '≡', roles: ['owner', 'finance'] },
+interface NavItem {
+  to: string
+  label: string
+  icon: string
+  roles: Role[]
+  badge?: 'order' | 'jatuh' | 'bukti'
+  end?: boolean
+}
+
+interface NavGroup {
+  id: string
+  title: string
+  items: NavItem[]
+}
+
+const GROUPS: NavGroup[] = [
+  {
+    id: 'ringkasan',
+    title: 'Ringkasan',
+    items: [
+      { to: '/app', label: 'Dasbor', icon: '✦', roles: ['owner', 'finance', 'worker', 'social'], end: true },
+      { to: '/app/monitoring', label: 'Monitoring', icon: '◉', roles: ['owner', 'finance', 'worker'] },
+    ],
+  },
+  {
+    id: 'penjualan',
+    title: 'Penjualan',
+    items: [
+      { to: '/app/order', label: 'Order', icon: '☰', roles: ['owner', 'finance', 'worker'], badge: 'order' },
+      { to: '/app/klien', label: 'Klien', icon: '☺', roles: ['owner', 'finance'] },
+      { to: '/app/layanan', label: 'Layanan & paket', icon: '◎', roles: ['owner', 'finance'] },
+      { to: '/app/portofolio', label: 'Portofolio', icon: '▣', roles: ['owner', 'social'] },
+    ],
+  },
+  {
+    id: 'dokumen',
+    title: 'Dokumen',
+    items: [
+      { to: '/app/kontrak', label: 'Kontrak', icon: '⌘', roles: ['owner', 'finance'] },
+      { to: '/app/tagihan', label: 'Invoice', icon: 'Rp', roles: ['owner', 'finance'], badge: 'jatuh' },
+      { to: '/app/pembayaran', label: 'Kuitansi & pembayaran', icon: '↓', roles: ['owner', 'finance'], badge: 'bukti' },
+    ],
+  },
+  {
+    id: 'keuangan',
+    title: 'Keuangan',
+    items: [
+      { to: '/app/keuangan', label: 'Kas & dana darurat', icon: '◈', roles: ['owner', 'finance'] },
+      { to: '/app/keuangan#bagi', label: 'Bagi hasil', icon: '%', roles: ['owner', 'finance'] },
+      { to: '/app/slip', label: 'Slip gaji', icon: '✎', roles: ['owner', 'finance'] },
+      { to: '/app/laporan', label: 'Laporan', icon: '▤', roles: ['owner', 'finance'] },
+    ],
+  },
+  {
+    id: 'tim',
+    title: 'Tim',
+    items: [
+      { to: '/app/pekerja', label: 'Anggota & peran', icon: '☺', roles: ['owner', 'finance'] },
+      { to: '/app/monitoring#beban', label: 'Beban kerja', icon: '▦', roles: ['owner', 'finance', 'worker'] },
+    ],
+  },
+  {
+    id: 'otomasi',
+    title: 'Otomasi',
+    items: [
+      { to: '/app/automasi', label: 'Automasi', icon: '⚡', roles: ['owner', 'finance'] },
+      { to: '/app/whatsapp#log', label: 'Log pesan WhatsApp', icon: '☰', roles: ['owner', 'finance'] },
+    ],
+  },
+  {
+    id: 'pengaturan',
+    title: 'Pengaturan',
+    items: [
+      { to: '/app/pengaturan', label: 'Profil usaha', icon: '⚙', roles: ['owner', 'finance'] },
+      { to: '/app/bayar', label: 'Pembayaran', icon: '▣', roles: ['owner', 'finance'] },
+      { to: '/app/whatsapp', label: 'WhatsApp', icon: '💬', roles: ['owner', 'finance'] },
+      { to: '/app/opsi', label: 'Opsi dropdown', icon: '▾', roles: ['owner', 'finance'] },
+      { to: '/app/pengaturan#akun', label: 'Akun', icon: '☺', roles: ['owner', 'finance', 'worker', 'social'] },
+      { to: '/app/audit', label: 'Jejak audit', icon: '≡', roles: ['owner'] },
+    ],
+  },
 ]
 
-const CRUMB: Record<string, string> = Object.fromEntries(LINKS.map((item) => [item.to, item.label]))
+function terlihat(item: NavItem, role: Role) {
+  return item.roles.includes(role)
+}
+
+function itemAktif(item: NavItem, pathname: string, hash: string) {
+  const [path, frag] = item.to.split('#')
+  if (item.end) return pathname === path
+  const sama = pathname === path || pathname.startsWith(`${path}/`)
+  if (!sama) return false
+  return frag ? hash === `#${frag}` : hash === ''
+}
+
+const CRUMB: Record<string, string> = {
+  '/app': 'Dasbor',
+  '/app/monitoring': 'Monitoring',
+  '/app/order': 'Order',
+  '/app/klien': 'Klien',
+  '/app/layanan': 'Layanan & paket',
+  '/app/portofolio': 'Portofolio',
+  '/app/kontrak': 'Kontrak',
+  '/app/tagihan': 'Invoice',
+  '/app/pembayaran': 'Kuitansi & pembayaran',
+  '/app/keuangan': 'Keuangan',
+  '/app/slip': 'Slip gaji',
+  '/app/laporan': 'Laporan',
+  '/app/pekerja': 'Anggota & peran',
+  '/app/automasi': 'Automasi',
+  '/app/whatsapp': 'WhatsApp',
+  '/app/pengaturan': 'Profil usaha',
+  '/app/bayar': 'Pembayaran',
+  '/app/opsi': 'Opsi dropdown',
+  '/app/audit': 'Jejak audit',
+}
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { state, loadError, act, prefetch } = useAnara()
   const navigate = useNavigate()
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('anara-side') === '1')
-  const [menu, setMenu] = useState(false)
+  const [sheet, setSheet] = useState(false)
   const [palette, setPalette] = useState(false)
+  const [closed, setClosed] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('anara-nav-groups') || '[]') as string[] } catch { return [] }
+  })
   const role = state.session?.role
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -148,31 +245,63 @@ export function AppShell({ children }: { children: ReactNode }) {
       </PublicShell>
     )
   }
-  const links = LINKS.filter((item) => role && item.roles.includes(role))
+  const peran = state.session.role
+  const hari = new Date().toISOString().slice(0, 10)
+  const badges = {
+    order: state.orders.filter((item) => item.stage === 'masuk_brief').length,
+    jatuh: state.invoices.filter((item) => item.status !== 'lunas' && item.status !== 'batal' && Boolean(item.dueDate) && item.dueDate < hari).length,
+    bukti: state.payments.filter((item) => item.status === 'menunggu').length,
+  }
+  const groups = GROUPS.map((group) => ({ ...group, items: group.items.filter((item) => terlihat(item, peran)) })).filter((group) => group.items.length > 0)
   const unread = state.notices.filter((item) => !item.read && (item.forRole === 'semua' || item.forRole === role)).length
   const crumb = CRUMB[location.pathname] || 'Dasbor'
   return (
-    <div className={`app ${menu ? 'menu-open' : ''} ${collapsed ? 'side-collapsed' : ''}`}>
+    <div className={`app ${sheet ? 'menu-open' : ''} ${collapsed ? 'side-collapsed' : ''}`}>
       <a className="skip" href="#isi">Loncat ke isi</a>
       <Aurora />
       <div className="app-shell">
         <aside className="side">
           <div className="side-top">
-            <NavLink to="/app" onClick={() => setMenu(false)}><img className="wm" src={wordmark} alt="anara" /></NavLink>
+            <NavLink to="/app" onClick={() => setSheet(false)}><img className="wm" src={wordmark} alt="anara" /></NavLink>
             <button className="btn btn-ghost btn-sm side-fold" type="button" aria-label={collapsed ? 'Lebarkan menu' : 'Ciutkan menu'} onClick={() => { const next = !collapsed; setCollapsed(next); localStorage.setItem('anara-side', next ? '1' : '0') }}>{collapsed ? '›' : '‹'}</button>
           </div>
           <nav aria-label="Dasbor">
-            {links.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.to === '/app'} title={item.label} className={({ isActive }) => (isActive ? 'on' : undefined)} onMouseEnter={prefetch} onFocus={prefetch} onClick={() => setMenu(false)}>
-                <span aria-hidden="true">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </NavLink>
-            ))}
-            <NavLink to="/" onClick={() => setMenu(false)}><span aria-hidden="true">↗</span><span className="nav-label">Lihat katalog</span></NavLink>
+            {groups.map((group) => {
+              const shut = !collapsed && closed.includes(group.id) && !group.items.some((item) => location.pathname === item.to.split('#')[0])
+              return (
+                <div key={group.id} className="nav-block">
+                  <button
+                    className="nav-group"
+                    type="button"
+                    aria-expanded={!shut}
+                    onClick={() => {
+                      const next = closed.includes(group.id) ? closed.filter((id) => id !== group.id) : [...closed, group.id]
+                      setClosed(next)
+                      localStorage.setItem('anara-nav-groups', JSON.stringify(next))
+                    }}
+                  >
+                    <span>{group.title}</span>
+                    <span aria-hidden="true">{shut ? '+' : '–'}</span>
+                  </button>
+                  {shut ? null : group.items.map((item) => {
+                    const count = item.badge ? badges[item.badge] : 0
+                    return (
+                      <NavLink key={item.to} to={item.to} end={item.end} title={item.label} className={itemAktif(item, location.pathname, location.hash) ? 'on' : undefined} onMouseEnter={prefetch} onFocus={prefetch} onClick={() => setSheet(false)}>
+                        <span className="nav-ico" aria-hidden="true">{item.icon}</span>
+                        <span className="nav-label">{item.label}</span>
+                        {count > 0 ? <em className="nav-badge">{count}</em> : null}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              )
+            })}
+            <NavLink to="/" onClick={() => setSheet(false)} title="Lihat katalog"><span className="nav-ico" aria-hidden="true">↗</span><span className="nav-label">Lihat katalog</span></NavLink>
           </nav>
           <div className="role">
             <b>{state.session.name}</b>
             <span className="nav-label">{role === 'owner' ? 'Pemilik' : role === 'finance' ? 'Keuangan dan Admin WA' : role === 'worker' ? 'Pekerja' : 'Admin media sosial'}</span>
+            <small className="build-tag" title={__ANARA_BUILD__}>Versi {__ANARA_BUILD__}</small>
           </div>
         </aside>
         <div className="main" id="isi">
@@ -194,29 +323,53 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       <nav className="mob-nav" aria-label="Navigasi dasbor">
-        <NavLink to="/app" end><span>✦</span>Ringkas</NavLink>
-        <NavLink to="/app/order"><span>☰</span>Order</NavLink>
-        <NavLink to="/app/tagihan"><span>Rp</span>Tagihan</NavLink>
-        <button type="button" onClick={() => setMenu((value) => !value)}><span>☰</span>Menu</button>
+        <NavLink to="/app" end><span>✦</span>Dasbor</NavLink>
+        {role !== 'social' ? <NavLink to="/app/order"><span>☰</span>Order{badges.order ? <i>{badges.order}</i> : null}</NavLink> : null}
+        {role === 'owner' || role === 'finance' ? <NavLink to="/app/tagihan"><span>⌘</span>Dokumen{badges.jatuh + badges.bukti ? <i>{badges.jatuh + badges.bukti}</i> : null}</NavLink> : null}
+        {role === 'owner' || role === 'finance' ? <NavLink to="/app/keuangan"><span>◈</span>Keuangan</NavLink> : null}
+        <button type="button" onClick={() => setSheet(true)}><span>☰</span>Lainnya</button>
       </nav>
-      {palette ? <CommandPalette links={links} onClose={() => setPalette(false)} /> : null}
+      {sheet ? (
+        <div className="nav-sheet">
+          <button className="palette-bg" type="button" aria-label="Tutup menu" onClick={() => setSheet(false)} />
+          <div className="nav-sheet-card">
+            <div className="side-top"><b>Menu</b><button className="btn btn-ghost btn-sm" type="button" onClick={() => setSheet(false)}>Tutup</button></div>
+            {groups.map((group) => (
+              <div key={group.id} className="nav-block">
+                <p className="nav-group">{group.title}</p>
+                {group.items.map((item) => {
+                  const count = item.badge ? badges[item.badge] : 0
+                  return (
+                    <NavLink key={item.to} to={item.to} end={item.end} className={itemAktif(item, location.pathname, location.hash) ? 'on' : undefined} onClick={() => setSheet(false)}>
+                      <span className="nav-ico" aria-hidden="true">{item.icon}</span>
+                      <span className="nav-label">{item.label}</span>
+                      {count > 0 ? <em className="nav-badge">{count}</em> : null}
+                    </NavLink>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {palette ? <CommandPalette groups={groups} onClose={() => setPalette(false)} /> : null}
       <a className="wa-float" href={WA} target="_blank" rel="noreferrer" aria-label="Chat WhatsApp">💬 <span>WhatsApp</span></a>
       <Flash />
     </div>
   )
 }
 
-function CommandPalette({ links, onClose }: { links: typeof LINKS; onClose: () => void }) {
+function CommandPalette({ groups, onClose }: { groups: NavGroup[]; onClose: () => void }) {
   const { state } = useAnara()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const items = useMemo(() => {
-    const pages = links.map((item) => ({ label: item.label, hint: 'Halaman', to: item.to }))
-    const orders = state.orders.slice(0, 40).map((item) => ({ label: `${item.code} · ${item.title}`, hint: 'Order', to: `/app/order/${item.id}` }))
-    const clients = state.clients.slice(0, 40).map((item) => ({ label: item.name, hint: 'Klien', to: `/app/klien/${item.id}` }))
+    const pages = groups.flatMap((group) => group.items.map((item) => ({ label: item.label, hint: group.title, to: item.to })))
+    const orders = state.orders.slice(0, 40).map((item) => ({ label: `${item.code} · ${item.title}`, hint: 'Penjualan', to: `/app/order/${item.id}` }))
+    const clients = state.clients.slice(0, 40).map((item) => ({ label: item.name, hint: 'Penjualan', to: `/app/klien/${item.id}` }))
     const needle = query.trim().toLowerCase()
-    return [...pages, ...orders, ...clients].filter((item) => !needle || item.label.toLowerCase().includes(needle)).slice(0, 12)
-  }, [links, query, state.orders, state.clients])
+    return [...pages, ...orders, ...clients].filter((item) => !needle || `${item.hint} ${item.label}`.toLowerCase().includes(needle)).slice(0, 12)
+  }, [groups, query, state.orders, state.clients])
   return (
     <div className="palette" role="dialog" aria-label="Pencarian">
       <button className="palette-bg" type="button" aria-label="Tutup pencarian" onClick={onClose} />

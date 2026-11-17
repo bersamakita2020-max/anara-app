@@ -360,7 +360,7 @@ export function FinancePage() {
         <div className="kpi v"><div className="l">Operasional</div><div className="n">{rupiah(money.ops)}</div><div className="s">Setelah pengeluaran</div></div>
         <div className="kpi t"><div className="l">Laba tercatat</div><div className="n">{rupiah(money.ownerProfit + money.partnerProfit)}</div><div className="s">Pemilik {rupiah(money.ownerProfit)}</div></div>
       </div>
-      <div className="card table-wrap">
+      <div className="card table-wrap" id="bagi">
         <h3>Bagi hasil per order lunas</h3>
         <table className="data">
           <thead><tr><th>Order</th><th>Fase</th><th className="num">Nilai</th><th className="num">Pengerja</th><th className="num">Kas</th><th className="num">Ops</th><th className="num">Laba</th></tr></thead>
@@ -523,7 +523,7 @@ export function MonitorPage() {
           </table>
           {orders.length === 0 ? <p className="empty">Tidak ada order berjalan.</p> : null}
         </div>
-        <div className="card">
+        <div className="card" id="beban">
           <h3>Beban kerja</h3>
           {load.map((item) => (
             <div key={item.worker.id} style={{ marginBottom: 10 }}>
@@ -757,7 +757,8 @@ export function SettingsPage() {
   return (
     <Shell>
       <h1>Pengaturan</h1>
-      <div className="card">
+      <div className="card" id="akun">
+        <p>Masuk sebagai {state.session?.name}. Peran {state.session?.role === 'owner' ? 'pemilik' : state.session?.role === 'finance' ? 'keuangan' : state.session?.role === 'worker' ? 'pekerja' : 'media sosial'}.</p>
         <p>Rekrutmen {money.recruitOpen ? 'terbuka' : 'terkunci'}. Syarat omzet {rupiah(settings.recruitRevenue)} selama {settings.recruitMonths} bulan dan kas {rupiah(settings.recruitCash)}.</p>
         <p>Omzet tiga bulan terakhir: {money.monthRevenue.map((item) => rupiah(item)).join(' · ')}. Kas {rupiah(money.cash)}.</p>
         {!owner ? <p>Perubahan skema, harga resmi, dan rekening hanya dapat disimpan pemilik.</p> : null}

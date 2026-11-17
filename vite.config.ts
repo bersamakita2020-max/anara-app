@@ -3,13 +3,28 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const buildLabel = new Date().toLocaleString('id-ID', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZone: 'Asia/Jakarta',
+})
+
 export default defineConfig({
   base: '/anara-app/',
+  define: {
+    __ANARA_BUILD__: JSON.stringify(buildLabel),
+  },
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-192.png', 'icon-maskable-512.png'],
       manifest: {
         name: 'ANARA',
@@ -28,9 +43,10 @@ export default defineConfig({
           { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,ttf}'],
-        navigateFallback: '/anara-app/index.html',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,svg,png,ico,woff2,ttf}'],
+        globIgnores: ['**/index.html', '**/*.webmanifest', 'sw.js'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
     }),
     {

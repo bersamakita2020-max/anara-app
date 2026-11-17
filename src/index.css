@@ -181,6 +181,9 @@ body.app{background:var(--ivory)}
 .side a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;font-size:13.5px;font-weight:500;color:var(--side-text);margin-bottom:2px}
 .side a:hover,.side a.on{background:var(--mist);color:var(--ink)}
 .side a.on{background:var(--grad);color:#fff}
+.side a.on .nav-badge{background:#fff;color:#5B21B6}
+.nav-sheet-card a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;color:var(--ink)}
+.nav-sheet-card a.on{background:var(--grad);color:#fff}
 .side .role{margin-top:auto;padding:12px;background:var(--mist);border-radius:16px;font-size:12px}
 .side .role b{display:block;color:var(--ink);font-family:Sora,sans-serif;font-size:13px;margin-bottom:2px}
 .main{padding:22px 28px 48px}
@@ -358,6 +361,16 @@ html[data-theme="dark"] .sec-head p{color:var(--muted)}
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
 .side-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side nav{overflow:auto;flex:1;padding-right:4px}
+.nav-block{margin-bottom:8px}
+.nav-group{display:flex;width:100%;justify-content:space-between;align-items:center;background:transparent;border:0;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:8px 10px 4px;cursor:pointer}
+.nav-block a{position:relative}
+.nav-badge, .mob-nav i{min-width:16px;height:16px;border-radius:999px;background:#7C3AED;color:#fff;font-style:normal;font-size:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;margin-left:auto}
+.nav-sheet{position:fixed;inset:0;z-index:70}
+.nav-sheet-card{position:absolute;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;background:var(--paper);color:var(--ink);border-radius:24px 24px 0 0;padding:16px 16px 28px;box-shadow:var(--shadow)}
+.app.side-collapsed .nav-group{display:none}
+.app.side-collapsed .nav-badge{position:absolute;top:4px;right:6px;margin:0}
+.build-tag{display:block;margin-top:6px;font-size:11px;line-height:1.3;color:var(--muted);font-weight:500}
 .side nav a{display:flex;align-items:center;gap:10px}
 .crumb{font-size:12px;color:var(--muted);margin:0}
 .top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
