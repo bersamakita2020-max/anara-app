@@ -1,4 +1,4 @@
-import type { AppState, OrderInput, Role, Settings, Stage } from '../types'
+import type { AppState, OrderInput, PayLine, PaySettings, Role, Settings, Stage } from '../types'
 
 export interface ApplyResult {
   error?: string
@@ -14,7 +14,14 @@ export type Action =
   | { type: 'set-price'; orderId: string; price: number }
   | { type: 'add-revision'; orderId: string; note: string }
   | { type: 'cancel-order'; orderId: string; reason: string }
-  | { type: 'add-payment'; orderId: string; invoiceId: string; amount: number; proofName: string }
+  | { type: 'add-payment'; orderId: string; invoiceId: string; amount: number; proofName: string; method?: string }
+  | { type: 'add-option'; category: string; label: string }
+  | { type: 'save-invoice'; clientId: string; orderId: string; dueDate: string; discount: number; taxPercent: number; note: string; lines: { description: string; qty: number; unit: string; unitPrice: number }[] }
+  | { type: 'save-payslip'; period: string; workerId: string; recipientName: string; recipientTitle: string; lines: PayLine[]; note: string }
+  | { type: 'set-payslip'; id: string; status: 'draf' | 'disetujui' | 'dibayar' }
+  | { type: 'save-pay-settings'; patch: PaySettings }
+  | { type: 'save-wa-public'; provider: 'none' | 'cloud' | 'fonnte'; phoneNumberId: string; wabaId: string }
+  | { type: 'set-order-source'; orderId: string; source: string }
   | { type: 'verify-payment'; paymentId: string; accept: boolean }
   | { type: 'add-expense'; date: string; category: string; amount: number; memo: string }
   | { type: 'sign'; contractId: string; name: string; agree: boolean; signature: string; ip: string; userAgent: string }

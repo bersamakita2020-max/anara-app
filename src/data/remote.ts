@@ -14,7 +14,7 @@ export async function loadRemote(): Promise<AppState> {
   if (!supabase) throw new Error('Server belum dikonfigurasi.')
   const base = emptyState()
   const packages = rows(await supabase.from('packages').select('*').order('sort'))
-  const [clients, workers, orders, events, checks, invoices, payments, splits, expenses, templates, contracts, portfolio, testimonials, audit, notices, rules, settingsRows, settlements, outbox] =
+  const [clients, workers, orders, events, checks, invoices, payments, splits, expenses, templates, contracts, portfolio, testimonials, audit, notices, rules, settingsRows, settlements, outbox, options, invoiceLines, payslips, waRows, waLog, payRows] =
     await Promise.all([
       supabase.from('clients').select('*'),
       supabase.from('workers').select('*'),
@@ -35,6 +35,12 @@ export async function loadRemote(): Promise<AppState> {
       supabase.from('app_settings').select('*').eq('id', 1),
       supabase.from('settlements').select('*'),
       supabase.from('wa_outbox').select('*').order('created_at', { ascending: false }).limit(40),
+      supabase.from('option_lists').select('*').order('sort'),
+      supabase.from('invoice_items').select('*').order('sort'),
+      supabase.from('payslips').select('*').order('created_at', { ascending: false }),
+      supabase.from('wa_settings').select('*').eq('id', 1),
+      supabase.from('wa_log').select('*').order('created_at', { ascending: false }).limit(40),
+      supabase.from('pay_settings').select('*').eq('id', 1),
     ])
   const session = (await supabase.auth.getSession()).data.session
   let user = null as AppState['session']
@@ -74,8 +80,16 @@ export async function loadRemote(): Promise<AppState> {
     orders: rows(orders, true).map(mapOrder),
     events: rows(events, true).map((row) => ({ id: String(row.id), orderId: String(row.order_id), stage: row.stage, note: row.note || '', actor: row.actor || '', at: row.created_at })),
     checks: rows(checks, true).map((row) => ({ id: String(row.id), orderId: String(row.order_id), stage: row.stage, sop: row.sop, label: row.label, done: Boolean(row.done) })),
-    invoices: rows(invoices, true).map((row) => ({ id: String(row.id), orderId: String(row.order_id), kind: row.kind, number: row.number, amount: Number(row.amount), status: row.status, dueDate: row.due_date || '', issuedAt: row.issued_at })),
-    payments: rows(payments, true).map((row) => ({ id: String(row.id), invoiceId: String(row.invoice_id || ''), orderId: String(row.order_id), amount: Number(row.amount), status: row.status, proofName: row.proof_name || '', note: row.note || '', paidAt: row.paid_at, verifiedAt: row.verified_at })),
+    invoices: rows(invoices, true).map((row) => ({
+      id: String(row.id), orderId: String(row.order_id || ''), clientId: String(row.client_id || ''), kind: row.kind, number: row.number,
+      amount: Number(row.amount), discount: Number(row.discount || 0), taxPercent: Number(row.tax_percent || 0), note: String(row.note || ''),
+      manual: Boolean(row.manual), uniqueCode: Number(row.unique_code || 0), status: row.status, dueDate: row.due_date || '', issuedAt: row.issued_at,
+    })),
+    payments: rows(payments, true).map((row) => ({
+      id: String(row.id), invoiceId: String(row.invoice_id || ''), orderId: String(row.order_id || ''), amount: Number(row.amount), status: row.status,
+      proofName: row.proof_name || '', proofPath: String(row.proof_path || ''), method: String(row.method || ''), receiptNumber: String(row.receipt_number || ''),
+      note: row.note || '', paidAt: row.paid_at, verifiedAt: row.verified_at,
+    })),
     splits: rows(splits, true).map((row) => ({
       id: String(row.id), orderId: String(row.order_id), phase: row.phase, gross: Number(row.gross), referral: Number(row.referral), base: Number(row.base),
       worker: Number(row.worker_amount), cash: Number(row.cash_amount), ops: Number(row.ops_amount), profit: Number(row.profit_amount),
@@ -96,6 +110,29 @@ export async function loadRemote(): Promise<AppState> {
     settings: settings?.payload && typeof settings.payload === 'object' ? { ...defaultSettings(), ...(settings.payload as AppState['settings']) } : base.settings,
     settlements: rows(settlements, true).map((row) => ({ id: String(row.id), period: row.period, status: row.status, note: row.note || '', approvedAt: row.approved_at })),
     outbox: rows(outbox, true).map((row) => ({ id: String(row.id), channel: row.channel, to: row.to_address || '', body: row.body || '', href: row.href || '', status: row.status, at: row.created_at })),
+    options: rows(options, true).map((row) => ({ id: String(row.id), category: String(row.category), label: String(row.label), sort: Number(row.sort || 0), active: row.active !== false })),
+    invoiceLines: rows(invoiceLines, true).map((row) => ({ id: String(row.id), invoiceId: String(row.invoice_id), description: String(row.description || ''), qty: Number(row.qty || 1), unit: String(row.unit || ''), unitPrice: Number(row.unit_price || 0), sort: Number(row.sort || 0) })),
+    payslips: rows(payslips, true).map((row) => ({
+      id: String(row.id), number: String(row.number || ''), period: String(row.period), workerId: String(row.worker_id || ''),
+      recipientName: String(row.recipient_name), recipientTitle: String(row.recipient_title || ''), status: row.status,
+      lines: Array.isArray(row.lines) ? row.lines as AppState['payslips'][number]['lines'] : [],
+      gross: Number(row.gross || 0), deductions: Number(row.deductions || 0), net: Number(row.net || 0), note: String(row.note || ''), createdAt: String(row.created_at),
+    })),
+    waSettings: (() => {
+      const row = rows(waRows, true)[0]
+      if (!row) return base.waSettings
+      return { provider: row.provider || 'none', phoneNumberId: String(row.phone_number_id || ''), wabaId: String(row.waba_id || ''), displayPhone: String(row.display_phone || '0858-1169-9699'), cloudReady: Boolean(row.cloud_ready), fonnteReady: Boolean(row.fonnte_ready) }
+    })(),
+    waLog: rows(waLog, true).map((row) => ({ id: String(row.id), direction: row.direction, peer: String(row.peer || ''), body: String(row.body || ''), status: String(row.status || ''), provider: String(row.provider || ''), detail: String(row.detail || ''), at: String(row.created_at) })),
+    paySettings: (() => {
+      const row = rows(payRows, true)[0]
+      if (!row) return base.paySettings
+      return {
+        provider: row.provider || 'manual', sandbox: row.sandbox !== false, qrisDynamic: row.qris_dynamic !== false, vaEnabled: Boolean(row.va_enabled),
+        bankName: String(row.bank_name || ''), bankNumber: String(row.bank_number || ''), bankHolder: String(row.bank_holder || ''),
+        qrisPath: String(row.qris_path || ''), tripayMerchant: String(row.tripay_merchant || ''), duitkuMerchant: String(row.duitku_merchant || ''),
+      }
+    })(),
     session: user,
   }
 }

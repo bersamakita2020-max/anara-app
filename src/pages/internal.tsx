@@ -2,6 +2,8 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ActionButton } from '../components/ActionButton'
 import { AppShell } from '../components/chrome'
+import { Combobox } from '../components/Combobox'
+import { CaraMengisi, Field } from '../components/Field'
 import { CurrencyInput } from '../components/CurrencyInput'
 import { useAnara } from '../data/store'
 import { downloadCsv } from '../lib/csv'
@@ -14,6 +16,35 @@ import type { Stage } from '../types'
 
 function Shell({ children }: { children: React.ReactNode }) {
   return <AppShell>{children}</AppShell>
+}
+
+function PeopleForm({ kind }: { kind: 'klien' | 'pekerja' }) {
+  const { state, act } = useAnara()
+  const [name, setName] = useState('')
+  const [whatsapp, setWhatsapp] = useState('')
+  const [title, setTitle] = useState('Pekerja lepas')
+  const jabatan = state.options.filter((item) => item.category === 'jabatan' && item.active)
+  return (
+    <form className="card" style={{ marginTop: 16 }} onSubmit={(event) => {
+      event.preventDefault()
+      if (kind === 'klien') void act({ type: 'save-client', name, whatsapp })
+      else void act({ type: 'save-worker', name, whatsapp, title, brand: 'studio' })
+      setName(''); setWhatsapp('')
+    }}>
+      <h3>Tambah</h3>
+      <CaraMengisi judul="Cara mengisi" butir={['Nama lengkap sesuai yang akan tampil di kontrak.', 'WhatsApp memakai angka, contoh 081234567890.', kind === 'pekerja' ? 'Jabatan bisa dipilih atau ditambah.' : 'Klien yang nomornya sama tidak digandakan.']} />
+      <Field id="nama-orang" label="Nama" required hint="Contoh: Siti Rahma">
+        <input className="field" id="nama-orang" value={name} placeholder="Siti Rahma" onChange={(event) => setName(event.target.value)} required />
+      </Field>
+      <Field id="wa-orang" label="WhatsApp" required hint="Contoh 0812-3456-7890.">
+        <input className="field" id="wa-orang" value={whatsapp} placeholder="081234567890" inputMode="tel" onChange={(event) => setWhatsapp(event.target.value)} required />
+      </Field>
+      {kind === 'pekerja' ? (
+        <Combobox label="Jabatan" required value={title} options={(jabatan.length ? jabatan : [{ id: '1', label: 'Pekerja lepas' }]).map((item) => ({ value: item.label, label: item.label }))} onChange={setTitle} onCreate={async (label) => { await act({ type: 'add-option', category: 'jabatan', label }) }} hint="Jabatan baru tersimpan untuk dipakai lagi." />
+      ) : null}
+      <ActionButton type="submit">Simpan</ActionButton>
+    </form>
+  )
 }
 
 export function DashboardPage() {
@@ -227,9 +258,7 @@ export function OrderDetailPage() {
 }
 
 export function PeoplePage({ kind }: { kind: 'klien' | 'pekerja' }) {
-  const { state, act } = useAnara()
-  const [name, setName] = useState('')
-  const [whatsapp, setWhatsapp] = useState('')
+  const { state } = useAnara()
   return (
     <Shell>
       <h1>{kind === 'klien' ? 'Klien' : 'Pekerja'}</h1>
@@ -261,19 +290,7 @@ export function PeoplePage({ kind }: { kind: 'klien' | 'pekerja' }) {
           </table>
         </div>
       )}
-      <form className="card" style={{ marginTop: 16 }} onSubmit={(event) => {
-        event.preventDefault()
-        if (kind === 'klien') void act({ type: 'save-client', name, whatsapp })
-        else void act({ type: 'save-worker', name, whatsapp, title: 'Pekerja lepas', brand: 'studio' })
-        setName(''); setWhatsapp('')
-      }}>
-        <h3>Tambah</h3>
-        <label htmlFor="nama-orang">Nama</label>
-        <input className="field" id="nama-orang" value={name} onChange={(event) => setName(event.target.value)} required />
-        <label htmlFor="wa-orang">WhatsApp</label>
-        <input className="field" id="wa-orang" value={whatsapp} onChange={(event) => setWhatsapp(event.target.value)} required />
-        <button className="btn btn-grad" type="submit">Simpan</button>
-      </form>
+      <PeopleForm kind={kind} />
     </Shell>
   )
 }

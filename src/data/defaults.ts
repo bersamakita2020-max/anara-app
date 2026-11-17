@@ -47,6 +47,12 @@ export function emptyState(): AppState {
     settings: defaultSettings(),
     settlements: [],
     outbox: [],
+    options: [],
+    invoiceLines: [],
+    payslips: [],
+    waSettings: { provider: 'none', phoneNumberId: '', wabaId: '', displayPhone: '0858-1169-9699', cloudReady: false, fonnteReady: false },
+    waLog: [],
+    paySettings: { provider: 'manual', sandbox: true, qrisDynamic: true, vaEnabled: false, bankName: '', bankNumber: '', bankHolder: '', qrisPath: '', tripayMerchant: '', duitkuMerchant: '' },
     session: null,
   }
 }
